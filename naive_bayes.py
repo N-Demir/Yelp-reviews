@@ -54,7 +54,6 @@ def create_dictionary(messages):
                 index_dict[word] = index
                 index += 1
 
-    print (len(index_dict))
     return index_dict
 
 
@@ -179,7 +178,7 @@ def predict_from_naive_bayes_model(model, matrix):
 
 
 
-def get_top_five_naive_bayes_words(model, dictionary):
+def get_top_n_naive_bayes_words(model, dictionary, n):
     """Compute the top five words that are most indicative of the spam (i.e positive) class.
 
     Ues the metric given in 6c as a measure of how indicative a word is.
@@ -188,6 +187,7 @@ def get_top_five_naive_bayes_words(model, dictionary):
     Args:
         model: The Naive Bayes model returned from fit_naive_bayes_model
         dictionary: A mapping of word to integer ids
+        n: The number of top words that we want to look at
 
     Returns: The top five most indicative words in sorted order with the most indicative first
     """
@@ -209,12 +209,37 @@ def get_top_five_naive_bayes_words(model, dictionary):
     # Sort based on ratio
     prob_for_word = sorted(prob_for_word, key=lambda x: x[1], reverse=True)
 
-    top_five = []
-    for i in range(5):
-        top_five.append(prob_for_word[i][0])
+    top_words = []
+    for i in range(n):
+        top_words.append(prob_for_word[i][0])
 
-    return top_five
-    # *** END CODE HERE ***
+    return top_words
+
+
+def analyze_results(test_reviews, true_labels, predictions):
+    ''' 
+    Compare the predictions to the true labels and see where we go wrong
+
+    Args: 
+        test_reviews: The actual reviews that we analys at test time
+        true_labels: The ground truth labeling
+        predictions: Our models predictions of the labels
+    '''
+    num_incorrect = 0
+    for i in range(true_labels.shape[0]):
+        # When the prediction is wrong what does the thing look like
+        if (true_labels[i] != int(predictions[i])):
+            num_incorrect += 1
+            print ("Incorrect Prediction #: %d" % (num_incorrect))
+            if (true_labels[i] == 0):
+                print ("Should have prediced Real Review")
+            else:
+                print ("Should have prediced Fake Review")
+
+            print("Review:")
+            print (test_reviews[i])
+
+            print ("\n\n")
 
 
 '''
@@ -250,15 +275,17 @@ def compute_best_svm_radius(train_matrix, train_labels, val_matrix, val_labels, 
 '''
 
 def main():
-    train_messages, train_labels = util.load_review_dataset('../op_spam_v1.4/positive_polarity', ['1', '2', '3', '4'])
-    test_messages, test_labels = util.load_review_dataset('../op_spam_v1.4/positive_polarity', ['5'])
+    train_reviews, train_labels = util.load_review_dataset('./data/op_spam_v1.4/positive_polarity', ['1', '2', '3', '4'])
+    test_reviews, test_labels = util.load_review_dataset('./data/op_spam_v1.4/positive_polarity', ['5'])
+    print (len(train_reviews))
+    print (len(test_labels))
     
-    dictionary = create_dictionary(train_messages)
+    dictionary = create_dictionary(train_reviews)
 
     util.write_json('./outputs/dictionary', dictionary)
 
-    train_matrix = transform_text(train_messages, dictionary)
-    test_matrix = transform_text(test_messages, dictionary)
+    train_matrix = transform_text(train_reviews, dictionary)
+    test_matrix = transform_text(test_reviews, dictionary)
 
     naive_bayes_model = fit_naive_bayes_model(train_matrix, train_labels)
 
@@ -270,11 +297,13 @@ def main():
 
     print('Naive Bayes had an accuracy of {} on the testing set'.format(naive_bayes_accuracy))
 
+    analyze_results(test_reviews, test_labels, naive_bayes_predictions)
+
+    top_n_words = get_top_n_naive_bayes_words(naive_bayes_model, dictionary, 10)
+
+    print('The top 5 indicative words for Naive Bayes are: ', top_n_words)
+
     '''
-    top_5_words = get_top_five_naive_bayes_words(naive_bayes_model, dictionary)
-
-    print('The top 5 indicative words for Naive Bayes are: ', top_5_words)
-
     util.write_json('./output/p06_top_indicative_words', top_5_words)
 
     optimal_radius = compute_best_svm_radius(train_matrix, train_labels, val_matrix, val_labels, [0.01, 0.1, 1, 10])
