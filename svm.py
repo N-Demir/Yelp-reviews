@@ -63,11 +63,11 @@ def main():
     svm = SVC(gamma = 'scale')
     svm.fit(training_features, train_labels)
     # y_pred = logreg.predict(test_features)
-    print('Accuracy of logistic regression classifier on test set: {:.4f}'.format(svm.score(test_features, test_labels)))
+    print('Accuracy of SVM with RBF kernel on test set: {:.4f}'.format(svm.score(test_features, test_labels)))
 
     linearSVM = SVC(kernel = "linear")
     linearSVM.fit(training_features, train_labels)
-    print('Accuracy of logistic regression classifier on test set: {:.4f}'.format(linearSVM.score(test_features, test_labels)))
+    print('Accuracy of SVM with linearKernel on test set: {:.4f}'.format(linearSVM.score(test_features, test_labels)))
     # np.savetxt('./outputs/logistic_regression_predictions', logistic_regression_predictions)
 
     # logistic_regression_accuracy = np.mean(logistic_regression_predictions == test_labels)
