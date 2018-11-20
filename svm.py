@@ -52,10 +52,10 @@ def get_features(messages, top_words):
 
     return features
 
-NUM_KFOLD_SPLITS = 5
+NUM_KFOLD_SPLITS = 20
 
 def main():
-    kf = KFold(n_splits=NUM_KFOLD_SPLITS)
+    kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
     messages, labels = util.load_review_dataset_full('data/op_spam_v1.4/positive_polarity')
 

@@ -5,7 +5,7 @@ from sklearn.model_selection import KFold
 
 import util
 
-NUM_KFOLD_SPLITS = 10
+NUM_KFOLD_SPLITS = 20
 
 def get_words(message):
     """Get the normalized list of words from a message string.
@@ -276,7 +276,7 @@ def compute_best_svm_radius(train_matrix, train_labels, val_matrix, val_labels, 
 '''
 
 def main():
-    kf = KFold(n_splits=NUM_KFOLD_SPLITS)
+    kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
     reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4/positive_polarity')
 

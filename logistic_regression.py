@@ -7,9 +7,9 @@ import numpy as np
 
 import util
 
-NUM_KFOLD_SPLITS = 5
+NUM_KFOLD_SPLITS = 20
 MAX_ITERATIONS = 1000
-LENGTH_OF_FEATURE_VECTOR = 2_000
+LENGTH_OF_FEATURE_VECTOR = 1000
 
 def get_words(message):
     """Get the normalized list of words from a message string.
@@ -129,10 +129,14 @@ def get_features(messages, top_words):
 
 
 def main():
-    kf = KFold(n_splits=NUM_KFOLD_SPLITS)
+    kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
     messages, labels = util.load_review_dataset_full('data/op_spam_v1.4/positive_polarity')
+    new_messages, new_labels = util.load_review_dataset_full('data/op_spam_v1.4/negative_polarity')
+    messages = np.concatenate([messages, new_messages])
+    labels = np.concatenate([labels, new_labels])
 
+    train_errors = []
     accuracies = []
     for train_index, test_index in kf.split(messages):
         train_messages, train_labels = messages[train_index], labels[train_index]
@@ -147,8 +151,10 @@ def main():
         logreg.fit(training_features, train_labels)
         y_pred = logreg.predict(test_features)
 
+        train_errors.append(logreg.score(training_features, train_labels))
         accuracies.append(logreg.score(test_features, test_labels))
-        
+    
+    print('Average training accuracy is: ', np.mean(train_errors))
     print('Accuracy of logistic regression classifier on test set: {:.3f}'.format(np.mean(accuracies)))
 
 
