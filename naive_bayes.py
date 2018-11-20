@@ -193,7 +193,6 @@ def get_top_n_naive_bayes_words(model, dictionary, n):
 
     Returns: The top five most indicative words in sorted order with the most indicative first
     """
-    # *** START CODE HERE ***
     word_count_not_fake, word_count_fake, count_words_fake, count_words_not_fake, prob_fake = model
     prob_for_word = []
     vocab_size = len(word_count_not_fake)
@@ -313,6 +312,8 @@ def main():
 
     print('Overall, Naive Bayes had an accuracy of: ', np.mean(accuracies))
 
+    precision, recall, f_score = util.precision_recall_fscore(test_labels, naive_bayes_predictions)
+    
     '''
     util.write_json('./output/p06_top_indicative_words', top_5_words)
 

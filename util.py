@@ -4,6 +4,7 @@ import os, fnmatch
 import matplotlib.pyplot as plt
 import numpy as np
 import json
+from sklearn.metrics import precision_recall_fscore_support
 
 def load_review_dataset(folder, folds):
 	"""Load the review dataset from a given polarity folder
@@ -62,6 +63,13 @@ def load_review_dataset_full(folder):
 	return np.array(reviews), np.array(labels)
 
 		
+
+def accuracy_predictor(true_labels, prections):
+	return np.mean(prections == test_labels)
+
+def precision_recall_fscore(true_labels, prections, average='binary'):
+	precision, recall, fscore, _ = precision_recall_fscore_support(true_labels, prections, average=average)
+	return precision, recall, fscore
 
 def write_json(filename, value):
     """Write the provided value as JSON to the given filename"""
