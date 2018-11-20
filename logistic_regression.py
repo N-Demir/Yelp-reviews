@@ -27,17 +27,17 @@ def get_words(message):
 
     return [word.lower() for word in message.split(" ")]
 
-def create_dictionary(messages):
+def create_dictionary(reviews):
     """Create a dictionary mapping words to integer indices.
 
     This function should create a dictionary of word to indices using the provided
-    training messages. Use get_words to process each message. 
+    training reviews. Use get_words to process each message. 
 
     Rare words are often not useful for modeling. Please only add words to the dictionary
-    if they occur in at least five messages.
+    if they occur in at least five reviews.
 
     Args:
-        messages: A list of strings containing SMS messages
+        reviews: A list of strings containing SMS reviews
 
     Returns:
         A python dict mapping words to integers.
@@ -47,7 +47,7 @@ def create_dictionary(messages):
     message_counts = collections.defaultdict(int)
 
     index = 0
-    for message in messages:
+    for message in reviews:
         unique_words = set(get_words(message))
 
         for word in unique_words:
@@ -64,8 +64,8 @@ def create_dictionary(messages):
 
 
 
-def transform_text(messages, word_dictionary):
-    """Transform a list of text messages into a numpy array for further processing.
+def transform_text(reviews, word_dictionary):
+    """Transform a list of text reviews into a numpy array for further processing.
 
     This function should create a numpy array that contains the number of times each word
     appears in each message. Each row in the resulting array should correspond to each 
@@ -75,7 +75,7 @@ def transform_text(messages, word_dictionary):
     are not present in the dictionary. Use get_words to get the words for a message.
 
     Args:
-        messages: A list of strings where each string is an SMS message.
+        reviews: A list of strings where each string is an SMS message.
         word_dictionary: A python dict mapping words to integers.
 
     Returns:
@@ -84,10 +84,10 @@ def transform_text(messages, word_dictionary):
     # *** START CODE HERE ***
 
 
-    mat = np.zeros((len(messages), len(word_dictionary)))
+    mat = np.zeros((len(reviews), len(word_dictionary)))
 
-    for i in range(len(messages)):
-        words = get_words(messages[i])
+    for i in range(len(reviews)):
+        words = get_words(reviews[i])
 
         for word in words:
             if word in word_dictionary:
@@ -97,11 +97,11 @@ def transform_text(messages, word_dictionary):
     return mat
     # *** END CODE HERE ***
 
-def get_top_words(messages, n):
+def get_top_words(reviews, n):
     histogram = {}
 
-    for i in range(len(messages)):
-        words = get_words(messages[i])
+    for i in range(len(reviews)):
+        words = get_words(reviews[i])
 
         for word in words:
             histogram[word] = histogram.get(word, 0) + 1
@@ -110,10 +110,10 @@ def get_top_words(messages, n):
 
     return dict((tup[0], i) for i, tup in enumerate(sorted_by_value[:n]))
 
-def get_features(messages, top_words):
+def get_features(reviews, top_words):
     features = []
 
-    for message in messages:
+    for message in reviews:
         feature = np.zeros(LENGTH_OF_FEATURE_VECTOR)
 
         words = get_words(message)
@@ -131,21 +131,18 @@ def get_features(messages, top_words):
 def main():
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
-    messages, labels = util.load_review_dataset_full('data/op_spam_v1.4/positive_polarity')
-    new_messages, new_labels = util.load_review_dataset_full('data/op_spam_v1.4/negative_polarity')
-    messages = np.concatenate([messages, new_messages])
-    labels = np.concatenate([labels, new_labels])
+    reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
 
     train_errors = []
     accuracies = []
-    for train_index, test_index in kf.split(messages):
-        train_messages, train_labels = messages[train_index], labels[train_index]
-        test_messages, test_labels = messages[test_index], labels[test_index]
+    for train_index, test_index in kf.split(reviews):
+        train_reviews, train_labels = reviews[train_index], labels[train_index]
+        test_reviews, test_labels = reviews[test_index], labels[test_index]
 
-        top_words = get_top_words(train_messages, n=LENGTH_OF_FEATURE_VECTOR)
+        top_words = get_top_words(train_reviews, n=LENGTH_OF_FEATURE_VECTOR)
 
-        training_features = get_features(train_messages, top_words)
-        test_features = get_features(test_messages, top_words)
+        training_features = get_features(train_reviews, top_words)
+        test_features = get_features(test_reviews, top_words)
 
         logreg = LogisticRegression(solver='lbfgs', max_iter=MAX_ITERATIONS)
         logreg.fit(training_features, train_labels)

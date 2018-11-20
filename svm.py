@@ -8,11 +8,11 @@ import util
 
 LENGTH_OF_FEATURE_VECTOR = 2_000
 
-def get_top_words(messages, n):
+def get_top_words(reviews, n):
     histogram = {}
 
-    for i in range(len(messages)):
-        words = get_words(messages[i])
+    for i in range(len(reviews)):
+        words = get_words(reviews[i])
 
         for word in words:
             histogram[word] = histogram.get(word, 0) + 1
@@ -37,10 +37,10 @@ def get_words(message):
 
     return [word.lower() for word in message.split(" ")]
 
-def get_features(messages, top_words):
+def get_features(reviews, top_words):
     features = []
 
-    for message in messages:
+    for message in reviews:
         feature = np.zeros(LENGTH_OF_FEATURE_VECTOR)
 
         words = get_words(message)
@@ -57,18 +57,18 @@ NUM_KFOLD_SPLITS = 20
 def main():
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
-    messages, labels = util.load_review_dataset_full('data/op_spam_v1.4/positive_polarity')
+    reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
 
     RBFaccuracies = []
     linearAccuracies = []
-    for train_index, test_index in kf.split(messages):
-        train_messages, train_labels = messages[train_index], labels[train_index]
-        test_messages, test_labels = messages[test_index], labels[test_index]
+    for train_index, test_index in kf.split(reviews):
+        train_reviews, train_labels = reviews[train_index], labels[train_index]
+        test_reviews, test_labels = reviews[test_index], labels[test_index]
 
-        top_words = get_top_words(train_messages, n=LENGTH_OF_FEATURE_VECTOR)
+        top_words = get_top_words(train_reviews, n=LENGTH_OF_FEATURE_VECTOR)
 
-        training_features = get_features(train_messages, top_words)
-        test_features = get_features(test_messages, top_words)
+        training_features = get_features(train_reviews, top_words)
+        test_features = get_features(test_reviews, top_words)
 
         svm = SVC(gamma = 'scale')
         svm.fit(training_features, train_labels)

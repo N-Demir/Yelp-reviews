@@ -278,7 +278,7 @@ def compute_best_svm_radius(train_matrix, train_labels, val_matrix, val_labels, 
 def main():
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
-    reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4/positive_polarity')
+    reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
 
     accuracies = []
     for train_index, test_index in kf.split(reviews):
