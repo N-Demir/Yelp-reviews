@@ -1,4 +1,5 @@
 from sklearn.svm import SVC
+from sklearn.model_selection import KFold
 import collections
 import operator
 import numpy as np
@@ -51,23 +52,34 @@ def get_features(messages, top_words):
 
     return features
 
+NUM_KFOLD_SPLITS = 5
+
 def main():
-    train_messages, train_labels = util.load_review_dataset('data/op_spam_v1.4/positive_polarity', ['1', '2', '3', '4'])
-    test_messages, test_labels = util.load_review_dataset('data/op_spam_v1.4/positive_polarity', ['5'])
+    kf = KFold(n_splits=NUM_KFOLD_SPLITS)
 
-    top_words = get_top_words(train_messages, n=LENGTH_OF_FEATURE_VECTOR)
+    messages, labels = util.load_review_dataset_full('data/op_spam_v1.4/positive_polarity')
 
-    training_features = get_features(train_messages, top_words)
-    test_features = get_features(test_messages, top_words)
+    RBFaccuracies = []
+    linearAccuracies = []
+    for train_index, test_index in kf.split(messages):
+        train_messages, train_labels = messages[train_index], labels[train_index]
+        test_messages, test_labels = messages[test_index], labels[test_index]
 
-    svm = SVC(gamma = 'scale')
-    svm.fit(training_features, train_labels)
-    # y_pred = logreg.predict(test_features)
-    print('Accuracy of SVM with RBF kernel on test set: {:.4f}'.format(svm.score(test_features, test_labels)))
+        top_words = get_top_words(train_messages, n=LENGTH_OF_FEATURE_VECTOR)
 
-    linearSVM = SVC(kernel = "linear")
-    linearSVM.fit(training_features, train_labels)
-    print('Accuracy of SVM with linear Kernel on test set: {:.4f}'.format(linearSVM.score(test_features, test_labels)))
+        training_features = get_features(train_messages, top_words)
+        test_features = get_features(test_messages, top_words)
+
+        svm = SVC(gamma = 'scale')
+        svm.fit(training_features, train_labels)
+        RBFaccuracies.append(svm.score(test_features, test_labels))
+
+        linearSVM = SVC(kernel = "linear")
+        linearSVM.fit(training_features, train_labels)
+        linearAccuracies.append(linearSVM.score(test_features, test_labels))
+
+    print('Accuracy of SVM with RBF Kernel on test set: {:.3f}'.format(np.mean(RBFaccuracies)))
+    print('Accuracy of SVM with linear Kernel on test set: {:.3f}'.format(np.mean(linearAccuracies)))
     # np.savetxt('./outputs/logistic_regression_predictions', logistic_regression_predictions)
 
     # logistic_regression_accuracy = np.mean(logistic_regression_predictions == test_labels)
