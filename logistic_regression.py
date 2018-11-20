@@ -1,11 +1,14 @@
 import collections
 import operator
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import KFold
 
 import numpy as np
 
 import util
 
+NUM_KFOLD_SPLITS = 5
+MAX_ITERATIONS = 1000
 LENGTH_OF_FEATURE_VECTOR = 2_000
 
 def get_words(message):
@@ -126,24 +129,27 @@ def get_features(messages, top_words):
 
 
 def main():
-    train_messages, train_labels = util.load_review_dataset('data/op_spam_v1.4/positive_polarity', ['1', '2', '3', '4'])
-    test_messages, test_labels = util.load_review_dataset('data/op_spam_v1.4/positive_polarity', ['5'])
-    
-    top_words = get_top_words(train_messages, n=LENGTH_OF_FEATURE_VECTOR)
-    
-    training_features = get_features(train_messages, top_words)
-    test_features = get_features(test_messages, top_words)
+    kf = KFold(n_splits=NUM_KFOLD_SPLITS)
 
-    logreg = LogisticRegression()
-    logreg.fit(training_features, train_labels)
-    y_pred = logreg.predict(test_features)
-    print('Accuracy of logistic regression classifier on test set: {:.4f}'.format(logreg.score(test_features, test_labels)))
+    messages, labels = util.load_review_dataset_full('data/op_spam_v1.4/positive_polarity')
 
-    # np.savetxt('./outputs/logistic_regression_predictions', logistic_regression_predictions)
+    accuracies = []
+    for train_index, test_index in kf.split(messages):
+        train_messages, train_labels = messages[train_index], labels[train_index]
+        test_messages, test_labels = messages[test_index], labels[test_index]
 
-    # logistic_regression_accuracy = np.mean(logistic_regression_predictions == test_labels)
+        top_words = get_top_words(train_messages, n=LENGTH_OF_FEATURE_VECTOR)
 
-    # print('Logistic Regression had an accuracy of {} on the testing set'.format(logistic_regression_accuracy))
+        training_features = get_features(train_messages, top_words)
+        test_features = get_features(test_messages, top_words)
+
+        logreg = LogisticRegression(solver='lbfgs', max_iter=MAX_ITERATIONS)
+        logreg.fit(training_features, train_labels)
+        y_pred = logreg.predict(test_features)
+
+        accuracies.append(logreg.score(test_features, test_labels))
+        
+    print('Accuracy of logistic regression classifier on test set: {:.3f}'.format(np.mean(accuracies)))
 
 
 if __name__ == "__main__":

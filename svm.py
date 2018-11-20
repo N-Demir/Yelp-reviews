@@ -67,7 +67,7 @@ def main():
 
     linearSVM = SVC(kernel = "linear")
     linearSVM.fit(training_features, train_labels)
-    print('Accuracy of SVM with linearKernel on test set: {:.4f}'.format(linearSVM.score(test_features, test_labels)))
+    print('Accuracy of SVM with linear Kernel on test set: {:.4f}'.format(linearSVM.score(test_features, test_labels)))
     # np.savetxt('./outputs/logistic_regression_predictions', logistic_regression_predictions)
 
     # logistic_regression_accuracy = np.mean(logistic_regression_predictions == test_labels)

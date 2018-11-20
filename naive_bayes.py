@@ -1,9 +1,11 @@
 import collections
 
 import numpy as np
+from sklearn.model_selection import KFold
 
 import util
 
+NUM_KFOLD_SPLITS = 10
 
 def get_words(message):
     """Get the normalized list of words from a message string.
@@ -191,7 +193,6 @@ def get_top_n_naive_bayes_words(model, dictionary, n):
 
     Returns: The top five most indicative words in sorted order with the most indicative first
     """
-    # *** START CODE HERE ***
     word_count_not_fake, word_count_fake, count_words_fake, count_words_not_fake, prob_fake = model
     prob_for_word = []
     vocab_size = len(word_count_not_fake)
@@ -275,34 +276,44 @@ def compute_best_svm_radius(train_matrix, train_labels, val_matrix, val_labels, 
 '''
 
 def main():
-    train_reviews, train_labels = util.load_review_dataset('./data/op_spam_v1.4/positive_polarity', ['1', '2', '3', '4'])
-    test_reviews, test_labels = util.load_review_dataset('./data/op_spam_v1.4/positive_polarity', ['5'])
-    print (len(train_reviews))
-    print (len(test_labels))
+    kf = KFold(n_splits=NUM_KFOLD_SPLITS)
+
+    reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4/positive_polarity')
+
+    accuracies = []
+    for train_index, test_index in kf.split(reviews):
+        train_reviews, train_labels = reviews[train_index], labels[train_index]
+        test_reviews, test_labels = reviews[test_index], labels[test_index]
     
-    dictionary = create_dictionary(train_reviews)
+        dictionary = create_dictionary(train_reviews)
 
-    util.write_json('./outputs/dictionary', dictionary)
+        util.write_json('./outputs/dictionary', dictionary)
 
-    train_matrix = transform_text(train_reviews, dictionary)
-    test_matrix = transform_text(test_reviews, dictionary)
+        train_matrix = transform_text(train_reviews, dictionary)
+        test_matrix = transform_text(test_reviews, dictionary)
 
-    naive_bayes_model = fit_naive_bayes_model(train_matrix, train_labels)
+        naive_bayes_model = fit_naive_bayes_model(train_matrix, train_labels)
 
-    naive_bayes_predictions = predict_from_naive_bayes_model(naive_bayes_model, test_matrix)
+        naive_bayes_predictions = predict_from_naive_bayes_model(naive_bayes_model, test_matrix)
 
-    np.savetxt('./outputs/naive_bayes_predictions', naive_bayes_predictions)
+        np.savetxt('./outputs/naive_bayes_predictions', naive_bayes_predictions)
 
-    naive_bayes_accuracy = np.mean(naive_bayes_predictions == test_labels)
+        naive_bayes_accuracy = np.mean(naive_bayes_predictions == test_labels)
 
-    print('Naive Bayes had an accuracy of {} on the testing set'.format(naive_bayes_accuracy))
+        print('Naive Bayes had an accuracy of {} on the testing set'.format(naive_bayes_accuracy))
 
-    analyze_results(test_reviews, test_labels, naive_bayes_predictions)
+        analyze_results(test_reviews, test_labels, naive_bayes_predictions)
 
-    top_n_words = get_top_n_naive_bayes_words(naive_bayes_model, dictionary, 10)
+        top_n_words = get_top_n_naive_bayes_words(naive_bayes_model, dictionary, 10)
 
-    print('The top 5 indicative words for Naive Bayes are: ', top_n_words)
+        print('The top 5 indicative words for Naive Bayes are: ', top_n_words)
 
+        accuracies.append(naive_bayes_accuracy)
+
+    print('Overall, Naive Bayes had an accuracy of: ', np.mean(accuracies))
+
+    precision, recall, f_score = util.precision_recall_fscore(test_labels, naive_bayes_predictions)
+    
     '''
     util.write_json('./output/p06_top_indicative_words', top_5_words)
 
