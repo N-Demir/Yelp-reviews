@@ -2,4 +2,4 @@ __pycache__
 *.pyc
 .DS_STORE
 data/
-./Deep-Classification/.vector_cache
+./Deep-Classification/.vector_cache/
