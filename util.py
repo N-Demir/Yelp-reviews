@@ -46,6 +46,7 @@ def load_review_dataset(folder, folds):
 def load_review_dataset_full(folder):
 	reviews = []
 	labels = []
+	skip_files = ['LICENSE', "README.md", "labeled_reviews.tsv"]
 	fake = False
 	for root, dirs, files in os.walk(folder):
 		directory = os.path.basename(root)
@@ -54,11 +55,24 @@ def load_review_dataset_full(folder):
 		elif ("truthful" in directory):
 			fake = False
 
+
 		for file in files:
+			if file in skip_files:
+				continue
 			with open(os.path.join(root, file)) as f:
 				for review in f.readlines():
 					reviews.append(review.strip())
 					labels.append(1 if fake else 0)
+
+	# Output a file with the reviews
+	output_file = True
+	if (output_file):
+		# Dump the reviews to file
+		new_file = "./data/op_spam_v1.4/labeled_reviews.tsv"
+		with open(new_file, 'w') as f:
+			for i in range(len(reviews)):
+				#label = 1 if labels[i] == 'Y' else 0
+				print('%s\t%d' % (reviews[i], labels[i]), file=f) 
 
 	return np.array(reviews), np.array(labels)
 
@@ -78,4 +92,5 @@ def write_json(filename, value):
      
 #reviews, labels = load_review_dataset('../op_spam_v1.4/positive_polarity/', ['1'])
 #print (reviews)
+load_review_dataset_full('./data/op_spam_v1.4')
 	
