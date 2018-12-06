@@ -278,7 +278,8 @@ def compute_best_svm_radius(train_matrix, train_labels, val_matrix, val_labels, 
 def main():
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
-    reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
+    reviews, labels = util.load_yelp_dataset_full("data/YelpChi/")
+    # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
 
     accuracies = []
     for train_index, test_index in kf.split(reviews):
@@ -310,9 +311,11 @@ def main():
 
         accuracies.append(naive_bayes_accuracy)
 
+        precision, recall, f_score = util.precision_recall_fscore(test_labels, naive_bayes_predictions)
+        print("Precision {} Recall {} F_score {}".format(precision, recall, f_score))
     print('Overall, Naive Bayes had an accuracy of: ', np.mean(accuracies))
 
-    precision, recall, f_score = util.precision_recall_fscore(test_labels, naive_bayes_predictions)
+    # precision, recall, f_score = util.precision_recall_fscore(test_labels, naive_bayes_predictions)
     
     '''
     util.write_json('./output/p06_top_indicative_words', top_5_words)

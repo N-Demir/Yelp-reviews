@@ -6,6 +6,20 @@ import numpy as np
 import json
 from sklearn.metrics import precision_recall_fscore_support
 
+def load_yelp_dataset_full(folder):
+	reviews = []
+	labels = []
+
+	with open(folder + "output_review_yelpResData_NRYRcleaned.txt") as f:
+		reviews = f.read().splitlines()
+
+	with open(folder + "output_meta_yelpResData_NRYRcleaned.txt") as f:
+		for line in f.readlines():
+			metadata = line.split()
+			labels.append(int(metadata[4] == "Y"))
+
+	return np.array(reviews), np.array(labels)
+
 def load_review_dataset(folder, folds):
 	"""Load the review dataset from a given polarity folder
 
@@ -92,5 +106,5 @@ def write_json(filename, value):
      
 #reviews, labels = load_review_dataset('../op_spam_v1.4/positive_polarity/', ['1'])
 #print (reviews)
-load_review_dataset_full('./data/op_spam_v1.4')
+# load_review_dataset_full('./data/op_spam_v1.4')
 	
