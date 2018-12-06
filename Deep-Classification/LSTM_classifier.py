@@ -64,11 +64,14 @@ class LSTMClassifier(nn.Module):
         # Permute embeddings to follow standard lstm shape - (seq_len, batch, embed_size)
         #embeddings = embeddings.permute(1, 0, 2)
 
-        lstm_out, self.hidden_state = self.lstm(embeddings, self.hidden_state)
+        #lstm_out, self.hidden_state = self.lstm(embeddings, self.hidden_state)
+        # So we don't have to deal with initializing hidden states
+        lstm_out, hidden_states = self.lstm(embeddings)
 
         # Pass final hidden state through the linear layer to get predicition
         # NOTE: we want the hidden layer of the last LSTM layer so we use -1
-        output = self.label(self.hidden_state[0][-1]) # hidden_state - (num_layers, batch_size, hidden_size)
+        #output = self.label(self.hidden_state[0][-1]) # hidden_state - (num_layers, batch_size, hidden_size)
+        output = self.label(hidden_states[0][-1])
 
         return output # size - (batch_size, 1)
 

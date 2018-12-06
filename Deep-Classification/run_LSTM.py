@@ -9,9 +9,10 @@ import data_loader
 EMBEDDING_DIM = 100
 HIDDEN_DIM = 256
 BATCH_SIZE = 64
-EPOCHS = 1000
+EPOCHS = 10
 GRAD_CLIP = 1e-1
 NUM_LAYERS = 2
+DROPOUT = 0.5
 
 # Should include gradient clipping!!
 
@@ -23,9 +24,11 @@ def train(model, iterator, loss_function, optimizer):
 	model.train()
 	for batch in iterator:
 		# Get the reviews
-		reviews = batch.Text
+		#reviews = batch.Text
+		reviews = batch.text # For testing data set
 		# Get the labels
-		labels = batch.Label
+		#labels = batch.Label
+		labels = batch.label # For testing
 
 		optimizer.zero_grad()
 		# Re-set the hidden state for the LSTM
@@ -70,7 +73,7 @@ def main():
 
 	# Note we need to add weights for embeddings in a bit -- maybe for initial test don't have learned embeddings??
 	model = LSTMClassifier(batch_size=BATCH_SIZE, hidden_size=HIDDEN_DIM, 
-		vocab_size=vocab_size, embedding_dim=EMBEDDING_DIM, word_vec_weights=glove_vec_weights)
+		vocab_size=vocab_size, embedding_dim=EMBEDDING_DIM, word_vec_weights=glove_vec_weights, num_layers=NUM_LAYERS)
 
 
 	# Let us train this baby

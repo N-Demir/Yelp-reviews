@@ -41,7 +41,7 @@ def load_data():
     # Now we need to build the vocab for our actual data
     # Here we will use the pre-trained word vetors from "glove.6b.100"
     # We have to see if we need to put this file in the same folder?
-    TEXT.build_vocab(train_data, max_size=25000, vectors="../data/glove.6B.100d")
+    TEXT.build_vocab(train_data, max_size=25000, vectors="glove.6B.100d")
     # Not totally sure why we do this here
     LABEL.build_vocab(train_data) # Probably do not need this
 
