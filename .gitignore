@@ -3,3 +3,4 @@ __pycache__
 .DS_STORE
 data/
 /Deep-Classification/.vector_cache/
+/Deep-Classification/.data/
