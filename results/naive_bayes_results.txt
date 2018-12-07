@@ -1,0 +1,43 @@
+# Results from running Naive Bayes on GCloud on YelpChi dataset
+
+Naive Bayes had an accuracy of 0.8008447043534763 on the testing set for kfold 0
+Precision 0.296218487394958 Recall 0.33651551312649164 F_score 0.3150837988826815
+Naive Bayes had an accuracy of 0.780630484237894 on the testing set for kfold 1
+Precision 0.2657200811359026 Recall 0.29504504504504503 F_score 0.27961579509071505
+Naive Bayes had an accuracy of 0.8066298342541437 on the testing set for kfold 2
+Precision 0.2603938730853392 Recall 0.31648936170212766 F_score 0.2857142857142857
+Naive Bayes had an accuracy of 0.8027299317517063 on the testing set for kfold 3
+Precision 0.29559748427672955 Recall 0.3422330097087379 F_score 0.3172103487064117
+Naive Bayes had an accuracy of 0.8066298342541437 on the testing set for kfold 4
+Precision 0.29227557411273486 Recall 0.35353535353535354 F_score 0.32000000000000006
+Naive Bayes had an accuracy of 0.7981800454988626 on the testing set for kfold 5
+Precision 0.29568788501026694 Recall 0.3412322274881517 F_score 0.31683168316831684
+Naive Bayes had an accuracy of 0.8089047773805654 on the testing set for kfold 6
+Precision 0.2794759825327511 Recall 0.3316062176165803 F_score 0.30331753554502366
+Naive Bayes had an accuracy of 0.7988300292492687 on the testing set for kfold 7
+Precision 0.31237721021611004 Recall 0.37149532710280375 F_score 0.33938100320170755
+Naive Bayes had an accuracy of 0.7897302567435814 on the testing set for kfold 8
+Precision 0.26452905811623245 Recall 0.32038834951456313 F_score 0.2897914379802415
+Naive Bayes had an accuracy of 0.8141046473838154 on the testing set for kfold 9
+Precision 0.30045871559633025 Recall 0.32914572864321606 F_score 0.31414868105515587
+Naive Bayes had an accuracy of 0.8059798505037374 on the testing set for kfold 10
+Precision 0.31004366812227074 Recall 0.33569739952718675 F_score 0.322360953461975
+Naive Bayes had an accuracy of 0.7998050048748782 on the testing set for kfold 11
+Precision 0.2959830866807611 Recall 0.3309692671394799 F_score 0.3125
+Naive Bayes had an accuracy of 0.8144296392590186 on the testing set for kfold 12
+Precision 0.26695842450765866 Recall 0.3407821229050279 F_score 0.29938650306748466
+Naive Bayes had an accuracy of 0.8108547286317842 on the testing set for kfold 13
+Precision 0.28705882352941176 Recall 0.30423940149625933 F_score 0.29539951573849876
+Naive Bayes had an accuracy of 0.7955801104972375 on the testing set for kfold 14
+Precision 0.27616926503340755 Recall 0.2897196261682243 F_score 0.2827822120866591
+Naive Bayes had an accuracy of 0.7988300292492687 on the testing set for kfold 15
+Precision 0.27235772357723576 Recall 0.3392405063291139 F_score 0.30214205186020293
+Naive Bayes had an accuracy of 0.7942801429964251 on the testing set for kfold 16
+Precision 0.2584745762711864 Recall 0.3012345679012346 F_score 0.2782212086659065
+Naive Bayes had an accuracy of 0.8024049398765031 on the testing set for kfold 17
+Precision 0.2865979381443299 Recall 0.34663341645885287 F_score 0.31376975169300225
+Naive Bayes had an accuracy of 0.807604809879753 on the testing set for kfold 18
+Precision 0.29782608695652174 Recall 0.3374384236453202 F_score 0.3163972286374134
+Naive Bayes had an accuracy of 0.8063048423789405 on the testing set for kfold 19
+Precision 0.2834101382488479 Recall 0.3014705882352941 F_score 0.2921615201900238
+Overall, Naive Bayes had an accuracy of 0.8021644321627501 and precision 0.28488070412744937 and recall 0.32825557266445327 and f_score 0.30481077573728527
