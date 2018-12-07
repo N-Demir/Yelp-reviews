@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.model_selection import KFold
 from sklearn.naive_bayes import MultinomialNB
 
+import sys
 import util
 
 NUM_KFOLD_SPLITS = 20
@@ -116,7 +117,11 @@ def analyze_results(test_reviews, true_labels, predictions):
             print ("\n\n")
 
 def main():
-    dataset = "data/YelpChi/"
+    if len(sys.argv) >= 2:
+        dataset = sys.argv[1]
+    else: 
+        dataset = "data/YelpChi/"
+
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
     print('Loading in dataset from {}'.format(dataset))
@@ -160,7 +165,7 @@ def main():
         f_scores.append(f_score)
         i += 1
 
-    print('Overall, Naive Bayes had an accuracy of {} and precision {} and recall {} and f_score {}'.format(np.mean(accuracies), np.mean(precisions), np.mean(recalls), np.mean(f_scores))
+    print('Overall, Naive Bayes had an accuracy of {} and precision {} and recall {} and f_score {}'.format(np.mean(accuracies), np.mean(precisions), np.mean(recalls), np.mean(f_scores)))
 
 if __name__ == "__main__":
     main()
