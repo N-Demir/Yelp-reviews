@@ -1,0 +1,1 @@
+Overall, SVM had an accuracy of 0.809134473506562 and precision 0.2782332260493933 and recall 0.23730173028378818 and f_score 0.22969650970329006
