@@ -1,4 +1,5 @@
-from sklearn.svm import SVC
+#from sklearn.svm import SVC
+from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import KFold
 import collections
 import operator
@@ -37,6 +38,40 @@ def get_words(message):
 
     return [word.lower() for word in message.split(" ")]
 
+def create_dictionary(messages):
+    """Create a dictionary mapping words to integer indices.
+
+    This function should create a dictionary of word to indices using the provided
+    training messages. Use get_words to process each message.
+
+    Rare words are often not useful for modeling. Please only add words to the dictionary
+    if they occur in at least five messages.
+
+    Args:
+        messages: A list of strings containing SMS messages
+
+    Returns:
+        A python dict mapping words to integers.
+    """
+
+    index_dict = collections.defaultdict(int)
+    message_counts = collections.defaultdict(int)
+
+    index = 0
+    for message in messages:
+        unique_words = set(get_words(message))
+
+        for word in unique_words:
+            message_counts[word] += 1
+
+            # We have seen it for the fifth time so let us add it to
+            # the index_dict
+            if (message_counts[word] == 5):
+                index_dict[word] = index
+                index += 1
+
+    return index_dict
+
 def get_features(reviews, top_words):
     features = []
 
@@ -52,39 +87,76 @@ def get_features(reviews, top_words):
 
     return features
 
-NUM_KFOLD_SPLITS = 20
+def transform_text(messages, word_dictionary):
+    """Transform a list of text messages into a numpy array for further processing.
+
+    This function should create a numpy array that contains the number of times each word
+    appears in each message. Each row in the resulting array should correspond to each
+    message and each column should correspond to a word.
+
+    Use the provided word dictionary to map words to column indices. Ignore words that
+    are not present in the dictionary. Use get_words to get the words for a message.
+
+    Args:
+        messages: A list of strings where each string is an SMS message.
+        word_dictionary: A python dict mapping words to integers.
+
+    Returns:
+        A numpy array marking the words present in each message.
+    """
+    # *** START CODE HERE ***
+    mat = np.zeros((len(messages), len(word_dictionary)))
+
+    for i in range(len(messages)):
+        words = get_words(messages[i])
+
+        for word in words:
+            if word in word_dictionary:
+                word_indx = word_dictionary[word]
+                mat[i][word_indx] += 1
+
+    return mat
+    # *** END CODE HERE ***
+
+NUM_KFOLD_SPLITS = 10
 
 def main():
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
-    reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
+    reviews, labels = util.load_yelp_dataset_full("data/Yelp-Data/")
 
-    RBFaccuracies = []
-    linearAccuracies = []
+    # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
+
+    i = 0
+    accuracies = []
+    precisions = []
+    recalls = []
+    f_scores = []
     for train_index, test_index in kf.split(reviews):
+        print("Beginning train index ", i)
         train_reviews, train_labels = reviews[train_index], labels[train_index]
         test_reviews, test_labels = reviews[test_index], labels[test_index]
 
         top_words = get_top_words(train_reviews, n=LENGTH_OF_FEATURE_VECTOR)
 
-        training_features = get_features(train_reviews, top_words)
-        test_features = get_features(test_reviews, top_words)
+        dictionary = create_dictionary(train_reviews)
+        train_reviews = transform_text(train_reviews, dictionary)
+        test_reviews = transform_text(test_reviews, dictionary)
 
-        svm = SVC(gamma = 'scale')
-        svm.fit(training_features, train_labels)
-        RBFaccuracies.append(svm.score(test_features, test_labels))
+        linearSVM = SGDClassifier()
+        linearSVM.fit(train_reviews, train_labels)
+        SVM_predictions = linearSVM.predict(test_reviews)
 
-        linearSVM = SVC(kernel = "linear")
-        linearSVM.fit(training_features, train_labels)
-        linearAccuracies.append(linearSVM.score(test_features, test_labels))
+        SVM_accuracy = np.mean(SVM_predictions == test_labels)
+        precision, recall, f_score = util.precision_recall_fscore(test_labels, SVM_predictions)
+        accuracies.append(SVM_accuracy)
+        precisions.append(precision)
+        recalls.append(recall)
+        f_scores.append(f_score)
 
-    print('Accuracy of SVM with RBF Kernel on test set: {:.3f}'.format(np.mean(RBFaccuracies)))
-    print('Accuracy of SVM with linear Kernel on test set: {:.3f}'.format(np.mean(linearAccuracies)))
+        i+=1
+    print('Overall, SVM had an accuracy of {} and precision {} and recall {} and f_score {}'.format(np.mean(accuracies), np.mean(precisions), np.mean(recalls), np.mean(f_scores)))
     # np.savetxt('./outputs/logistic_regression_predictions', logistic_regression_predictions)
-
-    # logistic_regression_accuracy = np.mean(logistic_regression_predictions == test_labels)
-
-    # print('Logistic Regression had an accuracy of {} on the testing set'.format(logistic_regression_accuracy))
 
 
 if __name__ == "__main__":
