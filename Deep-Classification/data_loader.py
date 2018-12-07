@@ -10,14 +10,22 @@ import random
 spacy_en = spacy.load('en') # english language model
 # Later we will have a field for the actual folder 
 # and a path for test and train files
-train_path = '../data/op_spam_v1.4/labeled_reviews.tsv'
+#train_path = '../data/op_spam_v1.4/labeled_reviews.tsv'
+
+path = '../labeled_reviews.tsv'
 BATCH_SIZE = 64
 
 # Do this for testing 
 # To see if we match the results from online
 SEED = 1234
+#SEED = 229
+TRAIN_SPLIT = 0.9
+VAL_TEST_SPLIT = 0.5
+
+# Sets the random number generator of torch
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
+# May want to play with this for reproducability
 torch.backends.cudnn.deterministic = True
 
 def tokenizer(text): # create a tokenizer function
@@ -31,12 +39,14 @@ def load_data():
     #TEXT = Field(sequential=True, tokenize=tokenizer, lower=True)
     LABEL = LabelField(dtype=torch.float)
 
-    # Get the train dataset for now
-    '''
-    train_data = TabularDataset(
-        path=train_path, format='tsv',
-        fields=[('Text', TEXT), ('Label', LABEL)])
-    '''
+    # Get the entire dataset that we will then split
+    #data = TabularDataset(
+    #    path=path, format='tsv',
+    #    fields=[('Text', TEXT), ('Label', LABEL)])
+
+    #train_data, test_data = data.split(split_ratio=TRAIN_SPLIT, random_state=random.seed(SEED))
+    #valid_data, test_data = data.split(split_ratio=VAL_TEST_SPLIT, random_state=random.seed(SEED))
+    
     # Try loading in the IMB dataset to label pos or negative
     train_data, test_data = datasets.IMDB.splits(TEXT, LABEL) 
 
@@ -62,11 +72,6 @@ def load_data():
 
     train_itr, valid_itr, test_itr = BucketIterator.splits((train_data, valid_data, test_data),
         batch_size=BATCH_SIZE, device=device)
-
-    # Get the corresponding iterator for the train dataset - again want to later do for all
-    #train_itr = Iterator(train_data, batch_size=BATCH_SIZE, device=-1, sort_key=lambda x: len(x.Text), 
-     #       sort_within_batch=False, repeat=False, shuffle=True
-      #  )
 
     return TEXT, train_itr, valid_itr, test_itr
 

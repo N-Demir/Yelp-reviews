@@ -3,13 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
+import os
 from LSTM_classifier import LSTMClassifier
 import data_loader
 
+EPOCH_SAVE = 10
 EMBEDDING_DIM = 100
 HIDDEN_DIM = 256
 BATCH_SIZE = 64
-EPOCHS = 5
+EPOCHS = 2
 GRAD_CLIP = 1e-1
 NUM_LAYERS = 2
 DROPOUT = 0.5
@@ -106,7 +108,25 @@ def main():
 
 		print("Training loss: %f" % (train_loss))
 		print("Avg batch accuracy: %f" % (train_accuracy))
+		if (epoch % EPOCH_SAVE == 0):
+			save_model_by_name(model, epoch + 1)
 
+	# Save one truely at the end
+	if ((EPOCHS - 1) % EPOCH_SAVE != 0) :
+		save_model_by_name(model, epoch + 1)
+
+
+
+def save_model_by_name(model, global_step):
+    save_dir = os.path.join('checkpoints', model.name)
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    # Change for now
+    #file_path = os.path.join(save_dir, 'model-{:05d}.pt'.format(global_step))
+    file_path = os.path.join(save_dir, 'model-{:02d}.pt'.format(global_step))
+    state = model.state_dict()
+    torch.save(state, file_path)
+    print('Saved to {}'.format(file_path))
 	
 
 
