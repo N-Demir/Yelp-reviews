@@ -5,6 +5,7 @@ from torchtext.data import Iterator, BucketIterator
 from torchtext import datasets
 import torch
 from torch.nn import functional as F
+import random
 
 spacy_en = spacy.load('en') # english language model
 # Later we will have a field for the actual folder 
@@ -26,7 +27,8 @@ def tokenizer(text): # create a tokenizer function
 def load_data():
     # Fields for the dataset
     # The actual review message
-    TEXT = Field(sequential=True, tokenize=tokenizer, lower=True)
+    TEXT = Field(tokenize='spacy')
+    #TEXT = Field(sequential=True, tokenize=tokenizer, lower=True)
     LABEL = LabelField(dtype=torch.float)
 
     # Get the train dataset for now
@@ -37,6 +39,9 @@ def load_data():
     '''
     # Try loading in the IMB dataset to label pos or negative
     train_data, test_data = datasets.IMDB.splits(TEXT, LABEL) 
+
+    # Get train/valid split!!
+    train_data, valid_data = train_data.split(random_state=random.seed(SEED))
 
     # Now we need to build the vocab for our actual data
     # Here we will use the pre-trained word vetors from "glove.6b.100"
@@ -51,12 +56,19 @@ def load_data():
     # This seems very strange
     print ("Label Length: " + str(len(LABEL.vocab)))
 
-    # Get the corresponding iterator for the train dataset - again want to later do for all
-    train_itr = Iterator(train_data, batch_size=BATCH_SIZE, device=-1, sort_key=lambda x: len(x.Text), 
-            sort_within_batch=False, repeat=False, shuffle=True
-        )
 
-    return TEXT, train_itr
+    # Let us just create all the iterators for now
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    train_itr, valid_itr, test_itr = BucketIterator.splits((train_data, valid_data, test_data),
+        batch_size=BATCH_SIZE, device=device)
+
+    # Get the corresponding iterator for the train dataset - again want to later do for all
+    #train_itr = Iterator(train_data, batch_size=BATCH_SIZE, device=-1, sort_key=lambda x: len(x.Text), 
+     #       sort_within_batch=False, repeat=False, shuffle=True
+      #  )
+
+    return TEXT, train_itr, valid_itr, test_itr
 
 
 
