@@ -1,6 +1,7 @@
 import spacy
 import collections
 import operator
+import sys
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold
 
@@ -27,7 +28,7 @@ def get_words(message):
     Returns:
        The list of normalized words from the message.
     """
-    return [tok.text for tok in spacy_en.tokenizer(message)]
+    return [tok.text for tok in spacy_en.tokenizer(str(message))]
 
 def create_dictionary(reviews):
     """Create a dictionary mapping words to integer indices.
@@ -128,13 +129,26 @@ def get_features(reviews, top_words):
     return features
 
 def main():
+    if len(sys.argv) >= 2:
+        dataset = sys.argv[1]
+    else: 
+        dataset = "data/YelpChi/"
+
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
-    # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
-    reviews, labels = util.load_yelp_dataset_full("data/YelpChi/")
+    print('Loading in dataset from {}'.format(dataset))
 
+    reviews, labels = util.load_yelp_dataset_full("data/YelpChi/")
+    # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
+
+    print('Beginning Logistic Regression training')
+
+    i = 0
     train_errors = []
     accuracies = []
+    precisions = []
+    recalls = []
+    f_scores = []
     for train_index, test_index in kf.split(reviews):
         train_reviews, train_labels = reviews[train_index], labels[train_index]
         test_reviews, test_labels = reviews[test_index], labels[test_index]
@@ -148,14 +162,22 @@ def main():
         logreg.fit(training_features, train_labels)
         y_pred = logreg.predict(test_features)
 
-        train_errors.append(logreg.score(training_features, train_labels))
-        accuracies.append(logreg.score(test_features, test_labels))
+        # train_errors.append(logreg.score(training_features, train_labels))
+        # accuracies.append(logreg.score(test_features, test_labels))
 
+        log_reg_accuracy = np.mean(y_pred == test_labels)
         precision, recall, f_score = util.precision_recall_fscore(test_labels, y_pred)
+
+        print('Logistic Regression had an accuracy of {} on the testing set for kfold {}'.format(log_reg_accuracy, i))
         print("Precision {} Recall {} F_score {}".format(precision, recall, f_score))
+
+        accuracies.append(log_reg_accuracy)
+        precisions.append(precision)
+        recalls.append(recall)
+        f_scores.append(f_score)
+        i += 1
     
-    print('Average training accuracy is: ', np.mean(train_errors))
-    print('Accuracy of logistic regression classifier on test set: {:.3f}'.format(np.mean(accuracies)))
+    print('Overall, Logistic Regression had an accuracy of {} and precision {} and recall {} and f_score {}'.format(np.mean(accuracies), np.mean(precisions), np.mean(recalls), np.mean(f_scores)))
 
 
 if __name__ == "__main__":
