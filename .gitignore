@@ -1,7 +1,8 @@
+.ipynb_checkpoints/
 __pycache__/
 *.pyc
 .DS_STORE
 data/
-output/
+outputs/
 /Deep-Classification/.vector_cache/
 /Deep-Classification/.data/
