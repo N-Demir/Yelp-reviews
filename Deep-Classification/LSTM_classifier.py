@@ -23,7 +23,7 @@ class LSTMClassifier(nn.Module):
         dropout: The drop out ratio - default to 0 meaning no dropout
         
         """
-        
+        self.name = "LSTM"
         self.batch_size = batch_size
         self.output_size = output_size
         self.hidden_size = hidden_size
@@ -66,37 +66,27 @@ class LSTMClassifier(nn.Module):
 
     def forward(self, sentence):
         # May want to init the hidden in the forward pass??
-        embeddings = self.word_embeddings(sentence) # - (batch, seq_len, embed_size)
+        embeddings = self.dropout(self.word_embeddings(sentence))
+
+        # Embeddings = [seq_len, batch, embed_size]
        
-        # No need I guess
-        # Permute embeddings to follow standard lstm shape - (seq_len, batch, embed_size)
-        #embeddings = embeddings.permute(1, 0, 2)
-        embeddings = self.dropout(embeddings)
-
-        #lstm_out, self.hidden_state = self.lstm(embeddings, self.hidden_state)
-        # So we don't have to deal with initializing hidden states
         lstm_out, (hidden, cell) = self.lstm(embeddings)
-        print (hidden.shape)
 
-        # Re=shape hidden
-        #hidden = hidden.view(self.num_layers, self.num_directions, self.batch_size, self.hidden_size)
-        #print (hidden.shape)
+        # Hidden = [num_layers * num_directions, batch, num_hidden_units)]
 
+        # Break up the num_layers and num_directions dimensions
+        hidden = hidden.view(self.num_layers, self.num_directions, hidden.shape[1], self.hidden_size)
 
         # Get the hidden state of the last lstm layer for the forward direction
-        #linear_input = hidden[-1, 0, :, :]
-        # If we have bidirectional layer than we concatenate the directions
-        #if (self.num_directions == 2):
-            #print ("here")
-            #linear_input = torch.cat((hidden[-1, 0, :, :], hidden[-1, 1, :, :]), dim=1)
+        linear_input = hidden[-1, 0, :, :]
+        # If we have bidirectional layer than we concatenate the hidden states from both directions
+        if (self.num_directions == 2):
+            # Forwards hidden state at hidden[-1, 1, ...] and backwards hidden[-1, 0, ...]
+            inear_input = torch.cat((hidden[-1, 0, :, :], hidden[-1, 1, :, :]), dim=1)
 
-        #linear_input = self.dropout(linear_input)
-        # Test!
-        linear_input = self.dropout(torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim=1))
+        linear_input = self.dropout(linear_input)
+        #linear_input = self.dropout(torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim=1))
          
-        # Pass final hidden state through the linear layer to get predicition
-        # NOTE: we want the hidden layer of the last LSTM layer so we use -1
-        #output = self.label(self.hidden_state[0][-1]) # hidden_state - (num_layers, batch_size, hidden_size)
         # Note we squeeze if the batch_size = 1
         output = self.label(linear_input.squeeze(0))
 

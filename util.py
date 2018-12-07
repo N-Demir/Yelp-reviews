@@ -103,6 +103,18 @@ def write_json(filename, value):
     with open(filename, 'w') as f:
         json.dump(value, f)
      
+def save_model_by_name(model, global_step):
+    save_dir = os.path.join('checkpoints', model.name)
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    # Change for now
+    #file_path = os.path.join(save_dir, 'model-{:05d}.pt'.format(global_step))
+    file_path = os.path.join(save_dir, 'model-{:02d}.pt'.format(global_step))
+    state = model.state_dict()
+    torch.save(state, file_path)
+    print('Saved to {}'.format(file_path))
+
+    
 #reviews, labels = load_review_dataset('../op_spam_v1.4/positive_polarity/', ['1'])
 #print (reviews)
 # load_review_dataset_full('./data/op_spam_v1.4')
