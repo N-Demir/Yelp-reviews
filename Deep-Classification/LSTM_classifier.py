@@ -35,7 +35,8 @@ class LSTMClassifier(nn.Module):
         
         # Initializing the look-up table to be the pre-trained Glove vecs
         self.word_embeddings = nn.Embedding(vocab_size, embedding_dim)
-        self.word_embeddings.weight = nn.Parameter(word_vec_weights, requires_grad=False) 
+
+        #self.word_embeddings.weight = nn.Parameter(word_vec_weights, requires_grad=False) 
 
         # The LSTM takes word embeddings as inputs, and outputs hidden states
         # with dimensionality hidden_dim.
@@ -66,11 +67,11 @@ class LSTMClassifier(nn.Module):
     def forward(self, sentence):
         # May want to init the hidden in the forward pass??
         embeddings = self.word_embeddings(sentence) # - (batch, seq_len, embed_size)
-        print (embeddings.shape)
        
         # No need I guess
         # Permute embeddings to follow standard lstm shape - (seq_len, batch, embed_size)
         #embeddings = embeddings.permute(1, 0, 2)
+        embeddings = self.dropout(embeddings)
 
         #lstm_out, self.hidden_state = self.lstm(embeddings, self.hidden_state)
         # So we don't have to deal with initializing hidden states
@@ -78,15 +79,21 @@ class LSTMClassifier(nn.Module):
         print (hidden.shape)
 
         # Re=shape hidden
-        hidden = hidden.view(self.num_layers, self.num_directions, self.batch_size, self.hidden_size)
+        #hidden = hidden.view(self.num_layers, self.num_directions, self.batch_size, self.hidden_size)
+        #print (hidden.shape)
+
 
         # Get the hidden state of the last lstm layer for the forward direction
-        linear_input = hidden[-1, 0, :, :]
+        #linear_input = hidden[-1, 0, :, :]
         # If we have bidirectional layer than we concatenate the directions
-        if (self.num_directions == 2):
-            linear_input = torch.cat((hidden[-1, 0, :, :], hidden[-1, 1, :, :]), dim=1)
+        #if (self.num_directions == 2):
+            #print ("here")
+            #linear_input = torch.cat((hidden[-1, 0, :, :], hidden[-1, 1, :, :]), dim=1)
 
-        linear_input = self.dropout(linear_input)
+        #linear_input = self.dropout(linear_input)
+        # Test!
+        linear_input = self.dropout(torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim=1))
+         
         # Pass final hidden state through the linear layer to get predicition
         # NOTE: we want the hidden layer of the last LSTM layer so we use -1
         #output = self.label(self.hidden_state[0][-1]) # hidden_state - (num_layers, batch_size, hidden_size)

@@ -14,8 +14,12 @@ GRAD_CLIP = 1e-1
 NUM_LAYERS = 2
 DROPOUT = 0.5
 BIDIRECTIONAL = True
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+SEED = 1234
+torch.manual_seed(SEED)
+torch.cuda.manual_seed(SEED)
+torch.backends.cudnn.deterministic = True
 # Should include gradient clipping!!
 
 def train(model, iterator, loss_function, optimizer):
@@ -85,14 +89,15 @@ def main():
 		vocab_size=vocab_size, embedding_dim=EMBEDDING_DIM, word_vec_weights=glove_vec_weights, 
 		num_layers=NUM_LAYERS, dropout=DROPOUT, bidirectional=BIDIRECTIONAL)
 
+	model.word_embeddings.weight.data.copy_(glove_vec_weights)
 
 	# Let us train this baby
-	loss_function = nn.BCEWithLogitsLoss()
 	optimizer = optim.Adam(model.parameters())
+	loss_function = nn.BCEWithLogitsLoss()
 
 	# Allow for running on GPU
-	model = model.to(device)
-	loss_function = loss_function.to(device)
+	model = model.to(DEVICE)
+	loss_function = loss_function.to(DEVICE)
 
 	# May not need?
 	for epoch in range(EPOCHS):
