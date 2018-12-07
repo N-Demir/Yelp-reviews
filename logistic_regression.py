@@ -1,3 +1,4 @@
+import spacy
 import collections
 import operator
 from sklearn.linear_model import LogisticRegression
@@ -6,6 +7,8 @@ from sklearn.model_selection import KFold
 import numpy as np
 
 import util
+
+spacy_en = spacy.load('en')
 
 NUM_KFOLD_SPLITS = 20
 MAX_ITERATIONS = 1000
@@ -24,8 +27,7 @@ def get_words(message):
     Returns:
        The list of normalized words from the message.
     """
-
-    return [word.lower() for word in message.split(" ")]
+    return [tok.text for tok in spacy_en.tokenizer(message)]
 
 def create_dictionary(reviews):
     """Create a dictionary mapping words to integer indices.
@@ -125,13 +127,11 @@ def get_features(reviews, top_words):
 
     return features
 
-
-
-
 def main():
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
-    reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
+    # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
+    reviews, labels = util.load_yelp_dataset_full("data/YelpChi/")
 
     train_errors = []
     accuracies = []
@@ -150,6 +150,9 @@ def main():
 
         train_errors.append(logreg.score(training_features, train_labels))
         accuracies.append(logreg.score(test_features, test_labels))
+
+        precision, recall, f_score = util.precision_recall_fscore(test_labels, y_pred)
+        print("Precision {} Recall {} F_score {}".format(precision, recall, f_score))
     
     print('Average training accuracy is: ', np.mean(train_errors))
     print('Accuracy of logistic regression classifier on test set: {:.3f}'.format(np.mean(accuracies)))
