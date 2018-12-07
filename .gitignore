@@ -1,6 +1,7 @@
-__pycache__
+__pycache__/
 *.pyc
 .DS_STORE
 data/
+output/
 /Deep-Classification/.vector_cache/
 /Deep-Classification/.data/
