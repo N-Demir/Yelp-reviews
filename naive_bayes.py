@@ -1,3 +1,4 @@
+import spacy
 import collections
 
 import numpy as np
@@ -8,6 +9,8 @@ import sys
 import util
 
 NUM_KFOLD_SPLITS = 20
+
+spacy_en = spacy.load('en')
 
 def get_words(message):
     """Get the normalized list of words from a message string.
@@ -23,7 +26,7 @@ def get_words(message):
        The list of normalized words from the message.
     """
 
-    return [word.lower() for word in message.split(" ")]
+    return [tok.text for tok in spacy_en.tokenizer(str(message))]
 
 
 def create_dictionary(messages):
