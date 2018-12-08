@@ -10,26 +10,28 @@ from datetime import datetime
 import numpy as np
 import os
 import random
+from sklearn.metrics import precision_recall_fscore_support
 
-N_EPOCHS = 5
+
+N_EPOCHS = 2000
 BATCH_SIZE = 64
 EMBEDDING_DIM = 100
 N_FILTERS = 100
 FILTER_SIZES = [3,4,5]
 OUTPUT_DIM = 1
 DROPOUT = 0.5
-EPOCH_SAVE = 10
+EPOCH_SAVE = 5
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 REPOSITORY_NAME = 'Yelp-reviews'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-SEED = 1234
-torch.manual_seed(SEED)
-torch.cuda.manual_seed(SEED)
-torch.backends.cudnn.deterministic = True
+#SEED = 1234
+#torch.manual_seed(SEED)
+#torch.cuda.manual_seed(SEED)
+#torch.backends.cudnn.deterministic = True
 
-TEXT = data.Field(tokenize='spacy')
+#TEXT = data.Field(tokenize='spacy')
 # LABEL = data.LabelField(dtype=torch.float)
 
 
@@ -90,11 +92,20 @@ def batch_accuracy(logits, y):
 	correct = (predictions == y).float()
 	return correct.sum() / len(correct)
 
+def batch_precision_recall_f_score(preds, y):
+    y_pred = torch.round(torch.sigmoid(preds))
+    y_pred = y_pred.detach().numpy()
+    y_true = y.detach().numpy()
+    precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
+    return precision, recall, f1_score
 
 def train(model, iterator, optimizer, loss_function):
 
     epoch_loss = 0
     epoch_acc = 0
+    epoch_prec = 0
+    epoch_recall = 0
+    epoch_f_score = 0
 
     model.train()
 
@@ -108,6 +119,7 @@ def train(model, iterator, optimizer, loss_function):
         loss = loss_function(predictions, batch.label)
 
         acc = batch_accuracy(predictions, batch.label)
+        precision, recall, f1_score = batch_precision_recall_f_score(predictions, batch.label)
 
         print ("Batch %d accuracy: %f" % (batch_i, acc))
 
@@ -117,13 +129,19 @@ def train(model, iterator, optimizer, loss_function):
 
         epoch_loss += loss.item()
         epoch_acc += acc.item()
+        epoch_prec += precision
+        epoch_recall += recall
+        epoch_f_score += f1_score
 
-    return epoch_loss / len(iterator), epoch_acc / len(iterator)
+    return epoch_loss / len(iterator), epoch_acc / len(iterator), epoch_prec / len(iterator), epoch_recall / len(iterator), epoch_f_score / len(iterator)
 
 def evaluate(model, iterator, loss_function):
 
     epoch_loss = 0
     epoch_acc = 0
+    epoch_prec = 0
+    epoch_recall = 0
+    epoch_f_score = 0
 
     model.eval()
 
@@ -137,21 +155,26 @@ def evaluate(model, iterator, loss_function):
 
             acc = batch_accuracy(predictions, batch.label)
 
+            precision, recall, f1_score = batch_precision_recall_f_score(predictions, batch.label)
+
             epoch_loss += loss.item()
             epoch_acc += acc.item()
+            epoch_prec += precision
+            epoch_recall += recall
+            epoch_f_score += f1_score
 
-    return epoch_loss / len(iterator), epoch_acc / len(iterator)
+    return epoch_loss / len(iterator), epoch_acc / len(iterator), epoch_prec / len(iterator), epoch_recall / len(iterator), epoch_f_score / len(iterator) 
 
 def main():
     # load the dataset
-    TEXT, train_iterator, valid_iterator, test_iterator = data_loader.load_data()
+    TEXT, train_itr, valid_itr, test_itr = data_loader.load_data()
     # train_data, test_data = datasets.IMDB.splits(TEXT, LABEL)
     # train_data, valid_data = train_data.split(random_state=random.seed(SEED))
     #
     # TEXT.build_vocab(train_data, max_size=25000, vectors="glove.6B.100d")
     # LABEL.build_vocab(train_data)
 
-    INPUT_DIM = len(TEXT.vocab)
+    input_dim = len(TEXT.vocab)
 
     # train_iterator, valid_iterator, test_iterator = data.BucketIterator.splits(
     #     (train_data, valid_data, test_data),
@@ -159,7 +182,7 @@ def main():
     #     device=device)
 
     # create an instance of the model
-    model = CNN(INPUT_DIM, EMBEDDING_DIM, N_FILTERS, FILTER_SIZES, OUTPUT_DIM, DROPOUT)
+    model = CNN(vocab_size=input_dim, embedding_dim=EMBEDDING_DIM, n_filters=N_FILTERS, filter_sizes=FILTER_SIZES, output_dim=OUTPUT_DIM, dropout=DROPOUT)
 
     pretrained_embeddings = TEXT.vocab.vectors
     model.embedding.weight.data.copy_(pretrained_embeddings)
@@ -173,14 +196,13 @@ def main():
     loss_function = loss_function.to(device)
 
     for epoch in range(N_EPOCHS):
-        train_loss, train_accuracy = train(model, train_iterator, optimizer, loss_function)
-        val_loss, val_accuraccy = evaluate(model, valid_iterator, loss_function)
-
-        print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f} ' +
-			'| Train Acc: {train_accuracy*100:.2f}% | Val. Loss: {val_loss:.3f} | Val. Acc: {val_accuracy*100:.2f}% |')
-
-        saveAccuracyAndLoss('train', train_accuracy, train_loss, epoch)
-        saveAccuracyAndLoss('valid', val_accuracy, val_loss, epoch)
+        
+        train_loss, train_acc, train_prec, train_recall, train_f_score = train(model, train_itr, optimizer, loss_function)
+        valid_loss, valid_acc, valid_prec, valid_recall, valid_f_score = evaluate(model, valid_itr, loss_function)
+        
+        print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f}| Train Acc: {train_acc*100:.2f}% | Train f1_score: {train_f_score*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% | Val. f1_score: {valid_f_score*100:.2f}%')
+        saveMetrics('train', train_acc, train_loss, train_prec, train_recall, train_f_score, epoch)
+        saveMetrics('valid', valid_acc, valid_loss, valid_prec, valid_recall, valid_f_score, epoch)
         if (epoch % EPOCH_SAVE == 0):
             saveModel(model, epoch)
 
@@ -219,6 +241,26 @@ def saveModel(model, epoch):
 
     state = model.state_dict()
     torch.save(state, model_path)
+
+def saveMetrics(prefix, accuracy, loss, precision, recall, f1_score, epoch):
+    path = setupCheckpoints()
+
+    accuracy_path = path / '{}-accuracy.txt'.format(prefix)
+    loss_path = path / '{}-loss.txt'.format(prefix)
+    precision_path = path / '{}-precision.txt'.format(prefix)
+    recall_path = path / '{}-recall.txt'.format(prefix)
+    f1_score_path = path / '{}-f1_score.txt'.format(prefix)
+
+    with open(accuracy_path, 'a+') as f:
+        f.write('{},{}\n'.format(epoch, accuracy))
+    with open(loss_path, 'a+') as f:
+        f.write('{},{}\n'.format(epoch, loss))
+    with open(precision_path, 'a+') as f:
+        f.write('{},{}\n'.format(epoch, precision))
+    with open(recall_path, 'a+') as f:
+        f.write('{},{}\n'.format(epoch, recall))
+    with open(f1_score_path, 'a+') as f:
+        f.write('{},{}\n'.format(epoch, f1_score))
 
 def saveAccuracyAndLoss(prefix, accuracy, loss, epoch):
     path = setupCheckpoints()

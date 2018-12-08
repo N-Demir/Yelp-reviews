@@ -12,14 +12,13 @@ import random
 # language models
 spacy_en = spacy.load('en') 
 
-path = '../../data/YelpChi/labeled_reviews.tsv'
+path = '../data/YelpChi/labeled_reviews.tsv'
 BATCH_SIZE = 64
 
 # Do this for testing 
 # To see if we match the results from online
 #SEED = 1234
 SEED = 229
-TRAIN_VAL_TEST_SPLIT = [0.9, 0.05, 0.05]
 TRAIN_SPLIT = 0.9
 VAL_TEST_SPLIT = 0.5
 
@@ -39,12 +38,11 @@ def tokenizer(text): # create a tokenizer function
     return [tok.text for tok in spacy_en.tokenizer(text)]
 
 # Note that now everything is tsv but would like json!!
-def load_data(preprocessing=None):
+def load_data():
     # Fields for the dataset
     # The actual review message
-    
     #TEXT = Field(tokenize='spacy') # -- Old way, unclear exactly what language model is used
-    TEXT = Field(sequential=True, tokenize=tokenizer, lower=True, preprocessing=preprocessing)
+    TEXT = Field(sequential=True, tokenize=tokenizer, lower=True)
     LABEL = LabelField(dtype=torch.float)
 
     # Get the entire dataset that we will then split
@@ -54,8 +52,8 @@ def load_data(preprocessing=None):
 
     # We should probabily look at the proportion of fake to non fake in each of these
     # set to make sure it is fairly even. Though probabilistically it should be I suppose
-    train_data, valid_data, test_data = data.split(split_ratio=TRAIN_VAL_TEST_SPLIT, random_state=random.seed(SEED))
-    #valid_data, test_data = test_data.split(split_ratio=VAL_TEST_SPLIT, random_state=random.seed(SEED))
+    train_data, test_data = data.split(split_ratio=TRAIN_SPLIT, random_state=random.seed(SEED))
+    valid_data, test_data = test_data.split(split_ratio=VAL_TEST_SPLIT, random_state=random.seed(SEED))
 
     print ('Size of train set: ' + str(len(train_data.examples)))
     print ('Size of val / test: ' + str(len(valid_data.examples)))
@@ -80,7 +78,7 @@ def load_data(preprocessing=None):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     train_itr, valid_itr, test_itr = BucketIterator.splits((train_data, valid_data, test_data),
-        batch_size=BATCH_SIZE, device=device, sort_key=lambda x: len(x.text))
+        batch_size=BATCH_SIZE, device=device)
 
     return TEXT, train_itr, valid_itr, test_itr
 
