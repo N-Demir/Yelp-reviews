@@ -9,11 +9,11 @@ import torch.optim as optim
 from pathlib import Path
 from datetime import datetime
 
-
+EPOCH_SAVE = 1
 EMBEDDING_DIM = 100
 OUTPUT_DIM = 1
 BATCH_SIZE = 64
-N_EPOCHS = 5
+N_EPOCHS = 6
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 REPOSITORY_NAME = 'Yelp-reviews'
@@ -132,8 +132,8 @@ def main():
         valid_loss, valid_acc = evaluate(model, valid_itr, loss_function)
         
         print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f} | Train Acc: {train_acc*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% |')
-        saveAccuracyAndLoss('train', train_accuracy, train_loss, epoch)
-        saveAccuracyAndLoss('valid', val_accuracy, val_loss, epoch)
+        saveAccuracyAndLoss('train', train_acc, train_loss, epoch)
+        saveAccuracyAndLoss('valid', valid_acc, valid_loss, epoch)
         if (epoch % EPOCH_SAVE == 0):
             saveModel(model, epoch)
 
