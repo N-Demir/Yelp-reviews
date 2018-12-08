@@ -69,7 +69,6 @@ class LSTMClassifier(nn.Module):
         embeddings = self.dropout(self.word_embeddings(sentence))
 
         # Embeddings = [seq_len, batch, embed_size]
-       
         lstm_out, (hidden, cell) = self.lstm(embeddings)
 
         # Hidden = [num_layers * num_directions, batch, num_hidden_units)]

@@ -1,3 +1,5 @@
+.vector_cache/
+.data/
 .ipynb_checkpoints/
 __pycache__/
 *.pyc

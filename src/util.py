@@ -5,6 +5,21 @@ import numpy as np
 import json
 from sklearn.metrics import precision_recall_fscore_support
 
+
+REPOSITORY_NAME = 'Yelp-reviews'
+
+def get_repository_path():
+	""" 
+	Returns the path of the project repository
+
+	Uses the global REPOSITORY_NAME constant and searches through parent directories
+	"""
+	p = Path('.').absolute().parents
+	for parent in p:
+		if parent.name == REPOSITORY_NAME:
+			return parent
+
+
 def load_yelp_dataset_full(folder):
 	reviews = []
 	labels = []
