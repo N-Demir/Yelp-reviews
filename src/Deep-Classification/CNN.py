@@ -13,14 +13,14 @@ import random
 from sklearn.metrics import precision_recall_fscore_support
 
 
-N_EPOCHS = 2000
+N_EPOCHS = 200000
 BATCH_SIZE = 64
 EMBEDDING_DIM = 100
 N_FILTERS = 100
 FILTER_SIZES = [3,4,5]
 OUTPUT_DIM = 1
 DROPOUT = 0.5
-EPOCH_SAVE = 5
+EPOCH_SAVE = 10
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 REPOSITORY_NAME = 'Yelp-reviews'
 
