@@ -8,20 +8,22 @@ import torch.nn.functional as F
 import torch.optim as optim
 from pathlib import Path
 from datetime import datetime
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import roc_auc_score
 
-EPOCH_SAVE = 1
+EPOCH_SAVE = 25
 EMBEDDING_DIM = 100
 OUTPUT_DIM = 1
 BATCH_SIZE = 64
-N_EPOCHS = 6
+N_EPOCHS = 200000
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 REPOSITORY_NAME = 'Yelp-reviews'
 
-SEED = 1234
-torch.manual_seed(SEED)
-torch.cuda.manual_seed(SEED)
-torch.backends.cudnn.deterministic = True
+#SEED = 1234
+#torch.manual_seed(SEED)
+#torch.cuda.manual_seed(SEED)
+#torch.backends.cudnn.deterministic = True
 
 class FastText(nn.Module):
     def __init__(self, vocab_size, embedding_dim, output_dim):
@@ -52,6 +54,10 @@ def train(model, iterator, optimizer, loss_function):
     
     epoch_loss = 0
     epoch_acc = 0
+    epoch_prec = 0
+    epoch_recall = 0
+    epoch_f_score = 0
+    #epoch_roc = 0
     
     model.train()
     
@@ -65,6 +71,8 @@ def train(model, iterator, optimizer, loss_function):
         loss = loss_function(logits, batch.label)
         
         acc = batch_accuracy(logits, batch.label)
+        precision, recall, f1_score = batch_precision_recall_f_score(logits, batch.label)
+        #roc_score = batch_roc_score(logits, batch.label)
 
         print ("Batch %d accuracy: %f" % (batch_i, acc))
         
@@ -74,12 +82,20 @@ def train(model, iterator, optimizer, loss_function):
         
         epoch_loss += loss.item()
         epoch_acc += acc.item()
+        epoch_prec += precision
+        epoch_recall += recall
+        epoch_f_score += f1_score
+        #epoch_roc += roc_score
         
-    return epoch_loss / len(iterator), epoch_acc / len(iterator)
+    return epoch_loss / len(iterator), epoch_acc / len(iterator), epoch_prec / len(iterator), epoch_recall / len(iterator), epoch_f_score / len(iterator) #, epoch_roc / len(iterator)
 
 def evaluate(model, iterator, loss_function):
     epoch_loss = 0
     epoch_acc = 0
+    epoch_prec = 0
+    epoch_recall = 0
+    epoch_f_score = 0
+    #epoch_roc = 0
     
     model.eval()
     with torch.no_grad():
@@ -90,17 +106,36 @@ def evaluate(model, iterator, loss_function):
             loss = loss_function(predictions, batch.label)
             
             acc = batch_accuracy(predictions, batch.label)
+            precision, recall, f1_score = batch_precision_recall_f_score(predictions, batch.label)
+            #roc_score = batch_roc_score(predictions, batch.label)
 
             epoch_loss += loss.item()
             epoch_acc += acc.item()
+            epoch_prec += precision
+            epoch_recall += recall
+            epoch_f_score += f1_score
+            #epoch_roc += roc_score
         
-    return epoch_loss / len(iterator), epoch_acc / len(iterator)
+    return epoch_loss / len(iterator), epoch_acc / len(iterator), epoch_prec / len(iterator), epoch_recall / len(iterator), epoch_f_score / len(iterator) #, epoch_roc / len(iterator)
 
 def batch_accuracy(preds, y):
     # Pass through sigmoid with decision bound at 0.5
     rounded_preds = torch.round(torch.sigmoid(preds))
     correct = (rounded_preds == y).float()
     return correct.sum() / len(correct)
+
+def batch_precision_recall_f_score(preds, y):
+    y_pred = torch.round(torch.sigmoid(preds))
+    y_pred = y_pred.detach().numpy()
+    y_true = y.detach().numpy()
+    precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
+    return precision, recall, f1_score
+
+def batch_roc_score(preds, y):
+    y_pred = torch.round(torch.sigmoid(preds))
+    y_pred = y_pred.detach().numpy()
+    y_true = y.detach().numpy() 
+    roc_score = roc_auc_score(y_true, y_pred)
 
 def main():
     def generate_bigrams(x):
@@ -128,12 +163,12 @@ def main():
 
     for epoch in range(N_EPOCHS):
 
-        train_loss, train_acc = train(model, train_itr, optimizer, loss_function)
-        valid_loss, valid_acc = evaluate(model, valid_itr, loss_function)
+        train_loss, train_acc, train_prec, train_recall, train_f_score = train(model, train_itr, optimizer, loss_function)
+        valid_loss, valid_acc, valid_prec, valid_recall, valid_f_score = evaluate(model, valid_itr, loss_function)
         
-        print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f} | Train Acc: {train_acc*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% |')
-        saveAccuracyAndLoss('train', train_acc, train_loss, epoch)
-        saveAccuracyAndLoss('valid', valid_acc, valid_loss, epoch)
+        print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f}| Train Acc: {train_acc*100:.2f}% | Train f1_score: {train_f_score*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% | Val. f1_score: {valid_f_score*100:.2f}%')
+        saveMetrics('train', train_acc, train_loss, train_prec, train_recall, train_f_score, epoch)
+        saveMetrics('valid', valid_acc, valid_loss, valid_prec, valid_recall, valid_f_score, epoch)
         if (epoch % EPOCH_SAVE == 0):
             saveModel(model, epoch)
 
@@ -153,12 +188,12 @@ def setupCheckpoints():
 
     p = get_repository_path()
     checkpoints_folder = p / 'checkpoints'
-    LSTM_folder = checkpoints_folder / 'LSTM'
-    cur_folder = LSTM_folder / CURRENT_TIME
+    Fast_Text_folder = checkpoints_folder / 'FastText'
+    cur_folder = Fast_Text_folder / CURRENT_TIME
 
     
     checkpoints_folder.mkdir(exist_ok=True)
-    LSTM_folder.mkdir(exist_ok=True)
+    Fast_Text_folder.mkdir(exist_ok=True)
     cur_folder.mkdir(exist_ok=True)
 
     return cur_folder
@@ -173,16 +208,25 @@ def saveModel(model, epoch):
     state = model.state_dict()
     torch.save(state, model_path)
 
-def saveAccuracyAndLoss(prefix, accuracy, loss, epoch):
+def saveMetrics(prefix, accuracy, loss, precision, recall, f1_score, epoch):
     path = setupCheckpoints()
 
     accuracy_path = path / '{}-accuracy.txt'.format(prefix)
     loss_path = path / '{}-loss.txt'.format(prefix)
+    precision_path = path / '{}-precision.txt'.format(prefix)
+    recall_path = path / '{}-recall.txt'.format(prefix)
+    f1_score_path = path / '{}-f1_score.txt'.format(prefix)
 
     with open(accuracy_path, 'a+') as f:
         f.write('{},{}\n'.format(epoch, accuracy))
     with open(loss_path, 'a+') as f:
         f.write('{},{}\n'.format(epoch, loss))
+    with open(precision_path, 'a+') as f:
+        f.write('{},{}\n'.format(epoch, precision))
+    with open(recall_path, 'a+') as f:
+        f.write('{},{}\n'.format(epoch, recall))
+    with open(f1_score_path, 'a+') as f:
+        f.write('{},{}\n'.format(epoch, f1_score))
 
 if __name__ == '__main__':
     main()

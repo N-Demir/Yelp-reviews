@@ -8,6 +8,8 @@ from LSTM_classifier import LSTMClassifier
 import data_loader
 from pathlib import Path
 from datetime import datetime
+from sklearn.metrics import precision_recall_fscore_support
+
 
 EPOCH_SAVE = 10
 EMBEDDING_DIM = 100
@@ -32,7 +34,10 @@ REPOSITORY_NAME = 'Yelp-reviews'
 def train(model, iterator, loss_function, optimizer):
 	
 	epoch_loss = 0
-	epoch_accuracy = 0
+	epoch_acc = 0
+	epoch_prec = 0
+	epoch_recall = 0
+	epoch_f_score = 0
 
 	model.train()
 	print (len(iterator))
@@ -56,6 +61,7 @@ def train(model, iterator, loss_function, optimizer):
 		loss = loss_function(logits, labels)
 		# Maybe compute accuracy for later
 		accuracy = batch_accuracy(logits, labels)
+		precision, recall, f1_score = batch_precision_recall_f_score(logits, batch.label)
 		print ("Batch %d accuracy: %f" % (batch_idx, accuracy))
 
 		loss.backward()
@@ -65,14 +71,20 @@ def train(model, iterator, loss_function, optimizer):
 		optimizer.step()
 
 		epoch_loss += loss.item()
-		epoch_accuracy += accuracy.item()
+		epoch_acc += acc.item()
+		epoch_prec += precision
+		epoch_recall += recall
+		epoch_f_score += f1_score
 
 	# This gives average loss maybe on the batch
-	return epoch_loss / len(iterator), epoch_accuracy / len(iterator)
+	return epoch_loss / len(iterator), epoch_acc / len(iterator), epoch_prec / len(iterator), epoch_recall / len(iterator), epoch_f_score / len(iterator)
 
 def evaluate_model(model, iterator, loss_function):
 	epoch_loss = 0
-	epoch_accuracy = 0
+	epoch_acc = 0
+	epoch_prec = 0
+	epoch_recall = 0
+	epoch_f_score = 0
 
 	model.eval()
 	with torch.no_grad():
@@ -86,12 +98,16 @@ def evaluate_model(model, iterator, loss_function):
 
 			loss = loss_function(logits, labels)
 			accuracy = loss_function(logits, labels)
+			precision, recall, f1_score = batch_precision_recall_f_score(logits, batch.label)
 
-			epoch_accuracy += accuracy.item()
-			epoch_loss += logits.item()
+			epoch_loss += loss.item()
+			epoch_acc += acc.item()
+			epoch_prec += precision
+			epoch_recall += recall
+			epoch_f_score += f1_score
 
 	# May want to do this differently - prob doesnt matter really
-	return (epoch_loss / len(iterator), epoch_accuracy / len(iterator))
+	return epoch_loss / len(iterator), epoch_acc / len(iterator), epoch_prec / len(iterator), epoch_recall / len(iterator), epoch_f_score / len(iterator) 
 
 
 
@@ -100,6 +116,13 @@ def batch_accuracy(logits, y):
 	predictions = torch.round(torch.sigmoid(logits))
 	correct = (predictions == y).float()
 	return correct.sum() / len(correct)
+
+def batch_precision_recall_f_score(preds, y):
+    y_pred = torch.round(torch.sigmoid(preds))
+    y_pred = y_pred.detach().numpy()
+    y_true = y.detach().numpy()
+    precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
+    return precision, recall, f1_score
 
 
 def main():
@@ -127,16 +150,18 @@ def main():
 
 	for epoch in range(EPOCHS):
 		print ("Epoch....%d" % (epoch))
-		train_loss, train_accuracy = train(model, train_itr, loss_function, optimizer)
-		val_loss, val_accuracy = evaluate_model(model, valid_itr, loss_function)
+		#train_loss, train_accuracy = train(model, train_itr, loss_function, optimizer)
+		#val_loss, val_accuracy = evaluate_model(model, valid_itr, loss_function)
+
+		train_loss, train_acc, train_prec, train_recall, train_f_score = train(model, train_itr, loss_function, optimizer)
+		valid_loss, valid_acc, valid_prec, valid_recall, valid_f_score = evaluate(model, valid_itr, loss_function)
 
 		## Here you have accuracy to the losses that we want to save
 
-		print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f} ' + 
-			'| Train Acc: {train_acc*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% |')
+		print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f} | Train Acc: {train_acc*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% |')
 
-		saveAccuracyAndLoss('train', train_accuracy, train_loss, epoch)
-		saveAccuracyAndLoss('valid', val_accuracy, val_loss, epoch)
+		saveMetrics('train', train_acc, train_loss, train_prec, train_recall, train_f_score, epoch)
+		saveMetrics('valid', valid_acc, valid_loss, valid_prec, valid_recall, valid_f_score, epoch)
 		if (epoch % EPOCH_SAVE == 0):
 			saveModel(model, epoch)
 
@@ -176,16 +201,27 @@ def saveModel(model, epoch):
 	state = model.state_dict()
 	torch.save(state, model_path)
 
-def saveAccuracyAndLoss(prefix, accuracy, loss, epoch):
+def saveMetrics(prefix, accuracy, loss, precision, recall, f1_score, epoch):
 	path = setupCheckpoints()
 
 	accuracy_path = path / '{}-accuracy.txt'.format(prefix)
 	loss_path = path / '{}-loss.txt'.format(prefix)
 
+	precision_path = path / '{}-precision.txt'.format(prefix)
+	recall_path = path / '{}-recall.txt'.format(prefix)
+	f1_score_path = path / '{}-f1_score.txt'.format(prefix)
+
 	with open(accuracy_path, 'a+') as f:
 		f.write('{},{}\n'.format(epoch, accuracy))
 	with open(loss_path, 'a+') as f:
 		f.write('{},{}\n'.format(epoch, loss))
+
+	with open(precision_path, 'a+') as f:
+		f.write('{},{}\n'.format(epoch, precision))
+	with open(recall_path, 'a+') as f:
+		f.write('{},{}\n'.format(epoch, recall))
+	with open(f1_score_path, 'a+') as f:
+		f.write('{},{}\n'.format(epoch, f1_score))
 
 if __name__ == '__main__':
 	main()
