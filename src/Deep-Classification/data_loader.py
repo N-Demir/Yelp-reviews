@@ -38,11 +38,12 @@ def tokenizer(text): # create a tokenizer function
     return [tok.text for tok in spacy_en.tokenizer(text)]
 
 # Note that now everything is tsv but would like json!!
-def load_data():
+def load_data(preprocessing=None):
     # Fields for the dataset
     # The actual review message
+    
     #TEXT = Field(tokenize='spacy') # -- Old way, unclear exactly what language model is used
-    TEXT = Field(sequential=True, tokenize=tokenizer, lower=True)
+    TEXT = Field(sequential=True, tokenize=tokenizer, lower=True, preprocessing=preprocessing)
     LABEL = LabelField(dtype=torch.float)
 
     # Get the entire dataset that we will then split

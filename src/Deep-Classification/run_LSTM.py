@@ -6,6 +6,8 @@ import numpy as np
 import os
 from LSTM_classifier import LSTMClassifier
 import data_loader
+from pathlib import Path
+from datetime import datetime
 
 EPOCH_SAVE = 10
 EMBEDDING_DIM = 100
@@ -18,6 +20,8 @@ DROPOUT = 0.5
 BIDIRECTIONAL = True
 CLIP_GRADIENTS = False
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+REPOSITORY_NAME = 'Yelp-reviews'
 
 # If we want to reproduce something very specific
 #SEED = 1234
@@ -131,37 +135,57 @@ def main():
 		print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f} ' + 
 			'| Train Acc: {train_acc*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% |')
 
+		saveAccuracyAndLoss('train', train_accuracy, train_loss, epoch)
+		saveAccuracyAndLoss('valid', val_accuracy, val_loss, epoch)
 		if (epoch % EPOCH_SAVE == 0):
-			save_model_by_name(model, epoch + 1)
+			saveModel(model, epoch)
 
-	# Save one truely at the end
-	if ((EPOCHS - 1) % EPOCH_SAVE != 0) :
-		save_model_by_name(model, epoch + 1)
 
-def load_model_by_name(model, file_path):
-	"""
-	Load saved checkpoint
+	saveModel(model, epoch)
 
-	Args:
-	    model: Model: (): A model
-	    file_path: saved checkpoint file
-	"""
-	model.load_state_dict(torch.load(file_path))
-	print("Loaded from {}".format(file_path))
+def setupCheckpoints():
+	def get_repository_path():
+		""" 
+		Returns the path of the project repository
 
-def save_model_by_name(model, global_step):
-    save_dir = os.path.join('checkpoints', model.name)
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    # Change for now
-    #file_path = os.path.join(save_dir, 'model-{:05d}.pt'.format(global_step))
-    file_path = os.path.join(save_dir, 'model-{:02d}.pt'.format(global_step))
-    state = model.state_dict()
-    torch.save(state, file_path)
-    print('Saved to {}'.format(file_path))
+		Uses the global REPOSITORY_NAME constant and searches through parent directories
+		"""
+		p = Path(__file__).absolute().parents
+		for parent in p:
+			if parent.name == REPOSITORY_NAME:
+				return parent
+
+	p = get_repository_path()
+	checkpoints_folder = p / 'checkpoints'
+	LSTM_folder = checkpoints_folder / 'LSTM'
+	cur_folder = LSTM_folder / CURRENT_TIME
 	
+	checkpoints_folder.mkdir(exist_ok=True)
+	LSTM_folder.mkdir(exist_ok=True)
+	cur_folder.mkdir(exist_ok=True)
+
+	return cur_folder
+
+def saveModel(model, epoch):
+	path = setupCheckpoints()
+	model_folder = path / 'models'
+	model_folder.mkdir(exist_ok=True)
+
+	model_path = model_folder / '{:02d}-model.pt'.format(epoch)
+
+	state = model.state_dict()
+	torch.save(state, model_path)
+
+def saveAccuracyAndLoss(prefix, accuracy, loss, epoch):
+	path = setupCheckpoints()
+
+	accuracy_path = path / '{}-accuracy.txt'.format(prefix)
+	loss_path = path / '{}-loss.txt'.format(prefix)
+
+	with open(accuracy_path, 'a+') as f:
+		f.write('{},{}\n'.format(epoch, accuracy))
+	with open(loss_path, 'a+') as f:
+		f.write('{},{}\n'.format(epoch, loss))
 
 if __name__ == '__main__':
 	main()
-
-
