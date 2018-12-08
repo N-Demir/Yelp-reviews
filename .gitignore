@@ -8,3 +8,4 @@ data/
 outputs/
 /Deep-Classification/.vector_cache/
 /Deep-Classification/.data/
+/checkpoints
