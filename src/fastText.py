@@ -6,6 +6,8 @@ import data_loader
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from pathlib import Path
+from datetime import datetime
 
 
 EMBEDDING_DIM = 100
@@ -64,9 +66,7 @@ def train(model, iterator, optimizer, loss_function):
         
         acc = batch_accuracy(logits, batch.label)
 
-        print ("Batch %d accuracy: %f" % (batch_i, accuracy))
-        saveAccuracyAndLoss(accuracy.item(), loss.item(), batch_i)
-        saveModel(model, batch_i)
+        print ("Batch %d accuracy: %f" % (batch_i, acc))
         
         loss.backward()
         
@@ -74,6 +74,25 @@ def train(model, iterator, optimizer, loss_function):
         
         epoch_loss += loss.item()
         epoch_acc += acc.item()
+        
+    return epoch_loss / len(iterator), epoch_acc / len(iterator)
+
+def evaluate(model, iterator, loss_function):
+    epoch_loss = 0
+    epoch_acc = 0
+    
+    model.eval()
+    with torch.no_grad():
+        for batch in iterator:
+
+            predictions = model(batch.text).squeeze(1)
+            
+            loss = loss_function(predictions, batch.label)
+            
+            acc = batch_accuracy(predictions, batch.label)
+
+            epoch_loss += loss.item()
+            epoch_acc += acc.item()
         
     return epoch_loss / len(iterator), epoch_acc / len(iterator)
 
@@ -85,10 +104,10 @@ def batch_accuracy(preds, y):
 
 def main():
     def generate_bigrams(x):
-    n_grams = set(zip(*[x[i:] for i in range(2)]))
-    for n_gram in n_grams:
-        x.append(' '.join(n_gram))
-    return x
+        n_grams = set(zip(*[x[i:] for i in range(2)]))
+        for n_gram in n_grams:
+            x.append(' '.join(n_gram))
+        return x
 
     # Load the data-set
     TEXT, train_itr, valid_itr, test_itr = data_loader.load_data(generate_bigrams)
@@ -109,11 +128,12 @@ def main():
 
     for epoch in range(N_EPOCHS):
 
-        train_loss, train_acc = train(model, train_iterator, optimizer, loss_function)
-        valid_loss, valid_acc = evaluate(model, valid_iterator, loss_function)
+        train_loss, train_acc = train(model, train_itr, optimizer, loss_function)
+        valid_loss, valid_acc = evaluate(model, valid_itr, loss_function)
         
         print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f} | Train Acc: {train_acc*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% |')
-        saveAccuracyAndLoss(train_accuracy, train_loss, epoch)
+        saveAccuracyAndLoss('train', train_accuracy, train_loss, epoch)
+        saveAccuracyAndLoss('valid', val_accuracy, val_loss, epoch)
         if (epoch % EPOCH_SAVE == 0):
             saveModel(model, epoch)
 
@@ -153,11 +173,11 @@ def saveModel(model, epoch):
     state = model.state_dict()
     torch.save(state, model_path)
 
-def saveAccuracyAndLoss(accuracy, loss, epoch):
+def saveAccuracyAndLoss(prefix, accuracy, loss, epoch):
     path = setupCheckpoints()
 
-    accuracy_path = path / 'accuracy.txt'
-    loss_path = path / 'loss.txt'
+    accuracy_path = path / '{}-accuracy.txt'.format(prefix)
+    loss_path = path / '{}-loss.txt'.format(prefix)
 
     with open(accuracy_path, 'a+') as f:
         f.write('{},{}\n'.format(epoch, accuracy))
