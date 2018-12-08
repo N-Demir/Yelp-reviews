@@ -82,7 +82,7 @@ class LSTMClassifier(nn.Module):
         # If we have bidirectional layer than we concatenate the hidden states from both directions
         if (self.num_directions == 2):
             # Forwards hidden state at hidden[-1, 1, ...] and backwards hidden[-1, 0, ...]
-            inear_input = torch.cat((hidden[-1, 0, :, :], hidden[-1, 1, :, :]), dim=1)
+            linear_input = torch.cat((hidden[-1, 0, :, :], hidden[-1, 1, :, :]), dim=1)
 
         linear_input = self.dropout(linear_input)
         #linear_input = self.dropout(torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim=1))

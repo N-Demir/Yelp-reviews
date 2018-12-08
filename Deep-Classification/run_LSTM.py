@@ -16,13 +16,14 @@ GRAD_CLIP = 1e-1
 NUM_LAYERS = 2
 DROPOUT = 0.5
 BIDIRECTIONAL = True
+CLIP_GRADIENTS = False
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-SEED = 1234
-torch.manual_seed(SEED)
-torch.cuda.manual_seed(SEED)
-torch.backends.cudnn.deterministic = True
-# Should include gradient clipping!!
+# If we want to reproduce something very specific
+#SEED = 1234
+#torch.manual_seed(SEED)
+#torch.cuda.manual_seed(SEED)
+#torch.backends.cudnn.deterministic = True
 
 def train(model, iterator, loss_function, optimizer):
 	
@@ -35,15 +36,10 @@ def train(model, iterator, loss_function, optimizer):
 		print ("Starting Batch: %d" % batch_idx)
 
 		# Get the reviews
-		#reviews = batch.Text
-		reviews = batch.text # For testing data set
-		# Get the labels
-		#labels = batch.Label
-		labels = batch.label # For testing
+		reviews = batch.text 
+		labels = batch.label 
 
 		optimizer.zero_grad()
-		# Re-set the hidden state for the LSTM
-		#model.hidden_state = model.init_hidden()
 
 		# Forward pass
 		logits = model.forward(reviews) 
@@ -59,7 +55,7 @@ def train(model, iterator, loss_function, optimizer):
 		print ("Batch %d accuracy: %f" % (batch_idx, accuracy))
 
 		loss.backward()
-		# Clip gradients
+		# Clip gradients 
 		#torch.nn.utils.clip_grad_norm_(model.parameters(), GRAD_CLIP)
 
 		optimizer.step()
@@ -69,6 +65,30 @@ def train(model, iterator, loss_function, optimizer):
 
 	# This gives average loss maybe on the batch
 	return epoch_loss / len(iterator), epoch_accuracy / len(iterator)
+
+def evaluate_model(model, iterator, loss_function):
+	epoch_loss = 0
+	epoch_accuracy = 0
+
+	model.eval()
+	with torch.no_grad():
+		for batch_idx, batch in enumerate(iterator):
+
+			reviews = batch.text
+			labels = batch.label 
+
+			logits = model.forward(reviews)
+			logits = logits.squeeze(1)
+
+			loss = loss_function(logits, labels)
+			accuracy = loss_function(logits, labels)
+
+			epoch_accuracy += accuracy.item()
+			epoch_loss += logits.item()
+
+	# May want to do this differently - prob doesnt matter really
+	return (epoch_loss / len(iterator), epoch_accuracy / len(iterator))
+
 
 
 def batch_accuracy(logits, y):
@@ -101,13 +121,16 @@ def main():
 	model = model.to(DEVICE)
 	loss_function = loss_function.to(DEVICE)
 
-	# May not need?
 	for epoch in range(EPOCHS):
 		print ("Epoch....%d" % (epoch))
 		train_loss, train_accuracy = train(model, train_itr, loss_function, optimizer)
+		val_loss, val_accuracy = evaluate_model(model, valid_itr, loss_function)
 
-		print("Training loss: %f" % (train_loss))
-		print("Avg batch accuracy: %f" % (train_accuracy))
+		## Here you have accuracy to the losses that we want to save
+
+		print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f} ' + 
+			'| Train Acc: {train_acc*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% |')
+
 		if (epoch % EPOCH_SAVE == 0):
 			save_model_by_name(model, epoch + 1)
 
@@ -115,7 +138,16 @@ def main():
 	if ((EPOCHS - 1) % EPOCH_SAVE != 0) :
 		save_model_by_name(model, epoch + 1)
 
+def load_model_by_name(model, file_path):
+	"""
+	Load saved checkpoint
 
+	Args:
+	    model: Model: (): A model
+	    file_path: saved checkpoint file
+	"""
+	model.load_state_dict(torch.load(file_path))
+	print("Loaded from {}".format(file_path))
 
 def save_model_by_name(model, global_step):
     save_dir = os.path.join('checkpoints', model.name)
@@ -128,7 +160,6 @@ def save_model_by_name(model, global_step):
     torch.save(state, file_path)
     print('Saved to {}'.format(file_path))
 	
-
 
 if __name__ == '__main__':
 	main()

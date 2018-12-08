@@ -7,67 +7,74 @@ import torch
 from torch.nn import functional as F
 import random
 
-spacy_en = spacy.load('en') # english language model
-# Later we will have a field for the actual folder 
-# and a path for test and train files
-#train_path = '../data/op_spam_v1.4/labeled_reviews.tsv'
+# English language model
+# Though we should play potentially with different 
+# language models
+spacy_en = spacy.load('en') 
 
-path = '../labeled_reviews.tsv'
+path = '../data/YelpChi/labeled_reviews.tsv'
 BATCH_SIZE = 64
 
 # Do this for testing 
 # To see if we match the results from online
-SEED = 1234
-#SEED = 229
+#SEED = 1234
+SEED = 229
 TRAIN_SPLIT = 0.9
 VAL_TEST_SPLIT = 0.5
 
 # Sets the random number generator of torch
-torch.manual_seed(SEED)
-torch.cuda.manual_seed(SEED)
+#torch.manual_seed(SEED)
+#torch.cuda.manual_seed(SEED)
 # May want to play with this for reproducability
-torch.backends.cudnn.deterministic = True
+#torch.backends.cudnn.deterministic = True
 
 def tokenizer(text): # create a tokenizer function
+    # Consider using tok.lemma to lemmatize the 
+    # vocabulary rather than true words
+
+    # We can also consider removing stop words!!
+
+    # Consider appending potentially named entity tags??
     return [tok.text for tok in spacy_en.tokenizer(text)]
 
 # Note that now everything is tsv but would like json!!
 def load_data():
     # Fields for the dataset
     # The actual review message
-    TEXT = Field(tokenize='spacy')
-    #TEXT = Field(sequential=True, tokenize=tokenizer, lower=True)
+    #TEXT = Field(tokenize='spacy') # -- Old way, unclear exactly what language model is used
+    TEXT = Field(sequential=True, tokenize=tokenizer, lower=True)
     LABEL = LabelField(dtype=torch.float)
 
     # Get the entire dataset that we will then split
-    #data = TabularDataset(
-    #    path=path, format='tsv',
-    #    fields=[('Text', TEXT), ('Label', LABEL)])
+    data = TabularDataset(
+        path=path, format='tsv',
+        fields=[('text', TEXT), ('label', LABEL)])
 
-    #train_data, test_data = data.split(split_ratio=TRAIN_SPLIT, random_state=random.seed(SEED))
-    #valid_data, test_data = data.split(split_ratio=VAL_TEST_SPLIT, random_state=random.seed(SEED))
+    # We should probabily look at the proportion of fake to non fake in each of these
+    # set to make sure it is fairly even. Though probabilistically it should be I suppose
+    train_data, test_data = data.split(split_ratio=TRAIN_SPLIT, random_state=random.seed(SEED))
+    valid_data, test_data = test_data.split(split_ratio=VAL_TEST_SPLIT, random_state=random.seed(SEED))
+
+    print ('Size of train set: ' + str(len(train_data.examples)))
+    print ('Size of val / test: ' + str(len(valid_data.examples)))
     
+    '''
     # Try loading in the IMB dataset to label pos or negative
     train_data, test_data = datasets.IMDB.splits(TEXT, LABEL) 
-
     # Get train/valid split!!
     train_data, valid_data = train_data.split(random_state=random.seed(SEED))
+    '''
 
     # Now we need to build the vocab for our actual data
     # Here we will use the pre-trained word vetors from "glove.6b.100"
-    # We have to see if we need to put this file in the same folder?
     TEXT.build_vocab(train_data, max_size=25000, vectors="glove.6B.100d")
-    # Not totally sure why we do this here
-    LABEL.build_vocab(train_data) # Probably do not need this
+    LABEL.build_vocab(train_data) 
 
     # Print stuff for sanity checks
     print ('Size of the vocab: ' + str(len(TEXT.vocab)))
     print ("Vector size of Text Vocabulary: ", TEXT.vocab.vectors.size())
-    # This seems very strange
     print ("Label Length: " + str(len(LABEL.vocab)))
 
-
-    # Let us just create all the iterators for now
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     train_itr, valid_itr, test_itr = BucketIterator.splits((train_data, valid_data, test_data),
