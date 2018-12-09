@@ -144,9 +144,9 @@ def batch_precision_recall_f_score(preds, y):
         for a in y:
             if y[0] != a: raise Exception('WHAT THE FUUUUUUCK')
         if y[0] == 0:
-            return precisions + [0.], recalls + [0.], f1_scores + [0.]
+            return np.concatenate([precisions, [0.]]), np.concatenate([recalls, [0.]]), np.concatenate([f1_scores, [0.]])
         else:
-            return [0.] + precisions, [0.] + recalls, [0.] + f1_scores
+            return np.concatenate([[0.], precisions]), np.concatenate([[0.], recalls]), np.concatenate([[0.], f1_scores])
     return precisions, recalls, f1_scores
 
 
