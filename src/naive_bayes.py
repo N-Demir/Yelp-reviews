@@ -213,8 +213,6 @@ def main():
 
         naive_bayes_predictions = clf.predict(test_reviews)
 
-        np.savetxt('../outputs/naive_bayes_predictions', naive_bayes_predictions)
-
         # analyze_results(test_reviews, test_labels, naive_bayes_predictions)
 
         naive_bayes_accuracy = np.mean(naive_bayes_predictions == test_labels)
