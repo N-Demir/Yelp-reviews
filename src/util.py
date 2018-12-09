@@ -9,7 +9,7 @@ from sklearn.metrics import precision_recall_fscore_support
 REPOSITORY_NAME = 'Yelp-reviews'
 
 def get_repository_path():
-	""" 
+	"""
 	Returns the path of the project repository
 
 	Uses the global REPOSITORY_NAME constant and searches through parent directories
@@ -34,6 +34,16 @@ def load_yelp_dataset_full(folder):
 
 	return np.array(reviews), np.array(labels)
 
+def load_tsv_dataset(path):
+	reviews = []
+	labels = []
+	with open(path) as tsvfile:
+		reader = csv.reader(tsvfile, dialect='excel-tab')
+		for row in reader:
+			reviews.append(row[0])
+			labels.append(int(row[1]))
+	return np.array(reviews), np.array(labels)
+
 def load_review_dataset(folder, folds):
 	"""Load the review dataset from a given polarity folder
 
@@ -51,7 +61,7 @@ def load_review_dataset(folder, folds):
 	reviews = []
 	labels = []
 
-	# Now we want to crawl through the folders 
+	# Now we want to crawl through the folders
 	# - deceptive..
 	# - truthful..
 	fake = False
@@ -100,11 +110,11 @@ def load_review_dataset_full(folder):
 		with open(new_file, 'w') as f:
 			for i in range(len(reviews)):
 				#label = 1 if labels[i] == 'Y' else 0
-				print('%s\t%d' % (reviews[i], labels[i]), file=f) 
+				print('%s\t%d' % (reviews[i], labels[i]), file=f)
 
 	return np.array(reviews), np.array(labels)
 
-		
+
 
 def accuracy_predictor(true_labels, prections):
 	return np.mean(prections == test_labels)
@@ -117,7 +127,7 @@ def write_json(filename, value):
     """Write the provided value as JSON to the given filename"""
     with open(filename, 'w') as f:
         json.dump(value, f)
-     
+
 def save_model_by_name(model, global_step):
     save_dir = os.path.join('checkpoints', model.name)
     if not os.path.exists(save_dir):
@@ -129,8 +139,7 @@ def save_model_by_name(model, global_step):
     torch.save(state, file_path)
     print('Saved to {}'.format(file_path))
 
-    
+
 #reviews, labels = load_review_dataset('../op_spam_v1.4/positive_polarity/', ['1'])
 #print (reviews)
 # load_review_dataset_full('./data/op_spam_v1.4')
-	
