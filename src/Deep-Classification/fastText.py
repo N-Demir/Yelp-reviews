@@ -90,7 +90,7 @@ def train(model, iterator, optimizer, loss_function):
         epoch_real_recall += recalls[0]
         epoch_fake_recall += recalls[1]
         epoch_real_f_score += f1_scores[0]
-        epoch_fake_f_score += f1_score[1]
+        epoch_fake_f_score += f1_scores[1]
         #epoch_roc += roc_score
     
     avg_prec = [epoch_real_prec / len(iterator), epoch_fake_prec / len(iterator)]
@@ -128,7 +128,7 @@ def evaluate(model, iterator, loss_function):
             epoch_real_recall += recalls[0]
             epoch_fake_recall += recalls[1]
             epoch_real_f_score += f1_scores[0]
-            epoch_fake_f_score += f1_score[1]
+            epoch_fake_f_score += f1_scores[1]
             #epoch_roc += roc_score
     
     avg_prec = [epoch_real_prec / len(iterator), epoch_fake_prec / len(iterator)]
