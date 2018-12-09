@@ -8,14 +8,14 @@ from torch.nn import functional as F
 import random
 
 # English language model
-# Though we should play potentially with different 
+# Though we should play potentially with different
 # language models
-spacy_en = spacy.load('en') 
+spacy_en = spacy.load('en')
 
-path = '../../data/YelpChi/labeled_reviews.tsv'
+path = '../../data/YelpChi/labeled_reviews_balanced.tsv'
 BATCH_SIZE = 64
 
-# Do this for testing 
+# Do this for testing
 # To see if we match the results from online
 #SEED = 1234
 SEED = 229
@@ -30,7 +30,7 @@ VAL_TEST_SPLIT = 0.5
 #torch.backends.cudnn.deterministic = True
 
 def tokenizer(text): # create a tokenizer function
-    # Consider using tok.lemma to lemmatize the 
+    # Consider using tok.lemma to lemmatize the
     # vocabulary rather than true words
 
     # We can also consider removing stop words!!
@@ -42,7 +42,7 @@ def tokenizer(text): # create a tokenizer function
 def load_data(preprocessing=None):
     # Fields for the dataset
     # The actual review message
-    
+
     #TEXT = Field(tokenize='spacy') # -- Old way, unclear exactly what language model is used
     TEXT = Field(sequential=True, tokenize=tokenizer, lower=True, preprocessing=preprocessing)
     LABEL = LabelField(dtype=torch.float)
@@ -59,10 +59,10 @@ def load_data(preprocessing=None):
 
     print ('Size of train set: ' + str(len(train_data.examples)))
     print ('Size of val / test: ' + str(len(valid_data.examples)))
-    
+
     '''
     # Try loading in the IMB dataset to label pos or negative
-    train_data, test_data = datasets.IMDB.splits(TEXT, LABEL) 
+    train_data, test_data = datasets.IMDB.splits(TEXT, LABEL)
     # Get train/valid split!!
     train_data, valid_data = train_data.split(random_state=random.seed(SEED))
     '''
@@ -70,7 +70,7 @@ def load_data(preprocessing=None):
     # Now we need to build the vocab for our actual data
     # Here we will use the pre-trained word vetors from "glove.6b.100"
     TEXT.build_vocab(train_data, max_size=25000, vectors="glove.6B.100d")
-    LABEL.build_vocab(train_data) 
+    LABEL.build_vocab(train_data)
 
     # Print stuff for sanity checks
     print ('Size of the vocab: ' + str(len(TEXT.vocab)))
@@ -83,7 +83,3 @@ def load_data(preprocessing=None):
         batch_size=BATCH_SIZE, device=device, sort_key=lambda x: len(x.text))
 
     return TEXT, train_itr, valid_itr, test_itr
-
-
-
-
