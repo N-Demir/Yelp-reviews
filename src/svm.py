@@ -118,6 +118,57 @@ def transform_text(messages, word_dictionary):
     return mat
     # *** END CODE HERE ***
 
+def setupCheckpoints():
+    def get_repository_path():
+        """ 
+        Returns the path of the project repository
+
+        Uses the global REPOSITORY_NAME constant and searches through parent directories
+        """
+        p = Path(__file__).absolute().parents
+        for parent in p:
+            if parent.name == REPOSITORY_NAME:
+                return parent
+
+    p = get_repository_path()
+    checkpoints_folder = p / 'checkpoints'
+    SVM_folder = checkpoints_folder / 'SVM'
+    cur_folder = SVM_folder / CURRENT_TIME
+    
+    checkpoints_folder.mkdir(exist_ok=True)
+    SVM_folder.mkdir(exist_ok=True)
+    cur_folder.mkdir(exist_ok=True)
+
+    return cur_folder
+
+def saveMetrics(prefix, accuracy, precisions, recalls, f1_scores, epoch):
+    real_precision, fake_precision = precisions
+    real_recall, fake_recall = recalls
+    real_f1_score, fake_f1_score = f1_scores
+
+    path = setupCheckpoints()
+
+    accuracy_path = path / '{}-accuracy.txt'.format(prefix)
+
+    real_precision_path = path / '{}-real-precision.txt'.format(prefix)
+    fake_precision_path = path / '{}-fake-precision.txt'.format(prefix)
+    real_recall_path = path / '{}-real-recall.txt'.format(prefix)
+    fake_recall_path = path / '{}-fake-recall.txt'.format(prefix)
+    real_f1_score_path = path / '{}-real-f1_score.txt'.format(prefix)
+    fake_f1_score_path = path / '{}-fake-f1_score.txt'.format(prefix)
+
+    def writeMetric(metric_path, value):
+        with open(metric_path, 'a+') as f:
+            f.write('{},{}\n'.format(epoch, value))
+
+    writeMetric(accuracy_path, accuracy)
+    writeMetric(real_precision_path, real_precision)
+    writeMetric(fake_precision_path, fake_precision)
+    writeMetric(real_recall_path, real_recall)
+    writeMetric(fake_recall_path, fake_recall)
+    writeMetric(real_f1_score_path, real_f1_score)
+    writeMetric(fake_f1_score_path, fake_f1_score)
+
 NUM_KFOLD_SPLITS = 10
 
 def main():
@@ -129,9 +180,12 @@ def main():
 
     i = 0
     accuracies = []
-    precisions = []
-    recalls = []
-    f_scores = []
+    real_precisions = []
+    fake_precisions = []
+    real_recalls = []
+    fake_recalls = []
+    real_f_scores = []
+    fake_f_scores = []
     for train_index, test_index in kf.split(reviews):
         print("Beginning train index ", i)
         train_reviews, train_labels = reviews[train_index], labels[train_index]
@@ -148,16 +202,29 @@ def main():
         SVM_predictions = linearSVM.predict(test_reviews)
 
         SVM_accuracy = np.mean(SVM_predictions == test_labels)
-        precision, recall, f_score = util.precision_recall_fscore(test_labels, SVM_predictions)
+
+        precisions, recalls, f_scores = util.precision_recall_fscore(test_labels, SVM_predictions)
+        real_precision, fake_precision = precisions
+        real_recall, fake_recall = recalls
+        real_f_score, fake_f_score = f_scores
+
         accuracies.append(SVM_accuracy)
-        precisions.append(precision)
-        recalls.append(recall)
-        f_scores.append(f_score)
+        real_precisions.append(real_precision)
+        fake_precisions.append(fake_precision)
+        real_recalls.append(real_recall)
+        fake_recalls.append(fake_recall)
+        real_f_scores.append(real_f_score)
+        fake_f_scores.append(fake_f_score)
 
-        i+=1
-    print('Overall, SVM had an accuracy of {} and precision {} and recall {} and f_score {}'.format(np.mean(accuracies), np.mean(precisions), np.mean(recalls), np.mean(f_scores)))
-    # np.savetxt('./outputs/logistic_regression_predictions', logistic_regression_predictions)
+        i += 1
 
+    avg_accuracy = np.mean(accuracies)
+
+    print('Overall, SVM had an accuracy of {}.'.format(avg_accuracy))
+    print('Real reviews with precision {} and recall {} and f_score {}'.format(np.mean(real_precisions), np.mean(real_recalls), np.mean(real_f_scores)))
+    print('Fake reviews with precision {} and recall {} and f_score {}'.format(np.mean(fake_precisions), np.mean(fake_recalls), np.mean(fake_f_scores)))
+
+    saveMetrics('valid', avg_accuracy, [np.mean(real_precisions), np.mean(fake_precisions)], [np.mean(real_recalls), p.mean(fake_recalls)], [np.mean(real_f_scores), np.mean(fake_f_scores)], i)
 
 if __name__ == "__main__":
     main()

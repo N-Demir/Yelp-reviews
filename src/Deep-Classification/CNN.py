@@ -96,16 +96,19 @@ def batch_precision_recall_f_score(preds, y):
     y_pred = torch.round(torch.sigmoid(preds))
     y_pred = y_pred.detach().cpu().numpy()
     y_true = y.detach().cpu().numpy()
-    precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
-    return precision, recall, f1_score
+    precisions, recalls, f1_scores, _ = precision_recall_fscore_support(y_true, y_pred)
+    return precisions, recalls, f1_scores
 
 def train(model, iterator, optimizer, loss_function):
 
-    epoch_loss = 0
-    epoch_acc = 0
-    epoch_prec = 0
-    epoch_recall = 0
-    epoch_f_score = 0
+    epoch_loss = 0.
+    epoch_acc = 0.
+    epoch_real_prec = 0.
+    epoch_fake_prec = 0.
+    epoch_real_recall = 0.
+    epoch_fake_recall = 0.
+    epoch_real_f_score = 0.
+    epoch_fake_f_score = 0.
 
     model.train()
 
@@ -119,7 +122,7 @@ def train(model, iterator, optimizer, loss_function):
         loss = loss_function(predictions, batch.label)
 
         acc = batch_accuracy(predictions, batch.label)
-        precision, recall, f1_score = batch_precision_recall_f_score(predictions, batch.label)
+        precisions, recalls, f1_scores = batch_precision_recall_f_score(predictions, batch.label)
 
         print ("Batch %d accuracy: %f" % (batch_i, acc))
 
@@ -129,19 +132,28 @@ def train(model, iterator, optimizer, loss_function):
 
         epoch_loss += loss.item()
         epoch_acc += acc.item()
-        epoch_prec += precision
-        epoch_recall += recall
-        epoch_f_score += f1_score
+        epoch_real_prec += precisions[0]
+        epoch_fake_prec += precisions[1]
+        epoch_real_recall += recalls[0]
+        epoch_fake_recall += recalls[1]
+        epoch_real_f_score += f1_scores[0]
+        epoch_fake_f_score += f1_score[1]
 
-    return epoch_loss / len(iterator), epoch_acc / len(iterator), epoch_prec / len(iterator), epoch_recall / len(iterator), epoch_f_score / len(iterator)
+    avg_prec = [epoch_real_prec / len(iterator), epoch_fake_prec / len(iterator)]
+    avg_recall = [epoch_real_recall / len(iterator),  epoch_fake_recall / len(iterator)]
+    avg_f_score = [epoch_real_f_score / len(iterator),  epoch_fake_f_score / len(iterator)]
+    return epoch_loss / len(iterator), epoch_acc / len(iterator), avg_prec, avg_recall, avg_f_score
 
 def evaluate(model, iterator, loss_function):
 
-    epoch_loss = 0
-    epoch_acc = 0
-    epoch_prec = 0
-    epoch_recall = 0
-    epoch_f_score = 0
+    epoch_loss = 0.
+    epoch_acc = 0.
+    epoch_real_prec = 0.
+    epoch_fake_prec = 0.
+    epoch_real_recall = 0.
+    epoch_fake_recall = 0.
+    epoch_real_f_score = 0.
+    epoch_fake_f_score = 0.
 
     model.eval()
 
@@ -159,11 +171,17 @@ def evaluate(model, iterator, loss_function):
 
             epoch_loss += loss.item()
             epoch_acc += acc.item()
-            epoch_prec += precision
-            epoch_recall += recall
-            epoch_f_score += f1_score
+            epoch_real_prec += precisions[0]
+            epoch_fake_prec += precisions[1]
+            epoch_real_recall += recalls[0]
+            epoch_fake_recall += recalls[1]
+            epoch_real_f_score += f1_scores[0]
+            epoch_fake_f_score += f1_score[1]
 
-    return epoch_loss / len(iterator), epoch_acc / len(iterator), epoch_prec / len(iterator), epoch_recall / len(iterator), epoch_f_score / len(iterator) 
+    avg_prec = [epoch_real_prec / len(iterator), epoch_fake_prec / len(iterator)]
+    avg_recall = [epoch_real_recall / len(iterator),  epoch_fake_recall / len(iterator)]
+    avg_f_score = [epoch_real_f_score / len(iterator),  epoch_fake_f_score / len(iterator)]
+    return epoch_loss / len(iterator), epoch_acc / len(iterator), avg_prec, avg_recall, avg_f_score  #, epoch_roc / len(iterator)
 
 def main():
     # load the dataset
@@ -195,12 +213,12 @@ def main():
     model = model.to(device)
     loss_function = loss_function.to(device)
 
-    for epoch in range(N_EPOCHS):
+    for epoch in range(1, N_EPOCHS):
         
         train_loss, train_acc, train_prec, train_recall, train_f_score = train(model, train_itr, optimizer, loss_function)
         valid_loss, valid_acc, valid_prec, valid_recall, valid_f_score = evaluate(model, valid_itr, loss_function)
         
-        print(f'| Epoch: {epoch+1:02} | Train Loss: {train_loss:.3f}| Train Acc: {train_acc*100:.2f}% | Train f1_score: {train_f_score*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% | Val. f1_score: {valid_f_score*100:.2f}%')
+        print(f'| Epoch: {epoch:02} | Train Loss: {train_loss:.3f}| Train Acc: {train_acc*100:.2f}% | Train f1_score: {train_f_score*100:.2f}% | Val. Loss: {valid_loss:.3f} | Val. Acc: {valid_acc*100:.2f}% | Val. f1_score: {valid_f_score*100:.2f}%')
         saveMetrics('train', train_acc, train_loss, train_prec, train_recall, train_f_score, epoch)
         saveMetrics('valid', valid_acc, valid_loss, valid_prec, valid_recall, valid_f_score, epoch)
         if (epoch % EPOCH_SAVE == 0):
@@ -242,37 +260,35 @@ def saveModel(model, epoch):
     state = model.state_dict()
     torch.save(state, model_path)
 
-def saveMetrics(prefix, accuracy, loss, precision, recall, f1_score, epoch):
-    path = setupCheckpoints()
+def saveMetrics(prefix, accuracy, loss, precisions, recalls, f1_scores, epoch):
+    real_precision, fake_precision = precisions
+    real_recall, fake_recall = recalls
+    real_f1_score, fake_f1_score = f1_scores
 
-    accuracy_path = path / '{}-accuracy.txt'.format(prefix)
-    loss_path = path / '{}-loss.txt'.format(prefix)
-    precision_path = path / '{}-precision.txt'.format(prefix)
-    recall_path = path / '{}-recall.txt'.format(prefix)
-    f1_score_path = path / '{}-f1_score.txt'.format(prefix)
-
-    with open(accuracy_path, 'a+') as f:
-        f.write('{},{}\n'.format(epoch, accuracy))
-    with open(loss_path, 'a+') as f:
-        f.write('{},{}\n'.format(epoch, loss))
-    with open(precision_path, 'a+') as f:
-        f.write('{},{}\n'.format(epoch, precision))
-    with open(recall_path, 'a+') as f:
-        f.write('{},{}\n'.format(epoch, recall))
-    with open(f1_score_path, 'a+') as f:
-        f.write('{},{}\n'.format(epoch, f1_score))
-
-def saveAccuracyAndLoss(prefix, accuracy, loss, epoch):
     path = setupCheckpoints()
 
     accuracy_path = path / '{}-accuracy.txt'.format(prefix)
     loss_path = path / '{}-loss.txt'.format(prefix)
 
-    with open(accuracy_path, 'a+') as f:
-        f.write('{},{}\n'.format(epoch, accuracy))
-    with open(loss_path, 'a+') as f:
-        f.write('{},{}\n'.format(epoch, loss))
+    real_precision_path = path / '{}-real-precision.txt'.format(prefix)
+    fake_precision_path = path / '{}-fake-precision.txt'.format(prefix)
+    real_recall_path = path / '{}-real-recall.txt'.format(prefix)
+    fake_recall_path = path / '{}-fake-recall.txt'.format(prefix)
+    real_f1_score_path = path / '{}-real-f1_score.txt'.format(prefix)
+    fake_f1_score_path = path / '{}-fake-f1_score.txt'.format(prefix)
 
+    def writeMetric(metric_path, value):
+        with open(metric_path, 'a+') as f:
+            f.write('{},{}\n'.format(epoch, value))
+
+    writeMetric(accuracy_path, accuracy)
+    writeMetric(loss_path, loss)
+    writeMetric(real_precision_path, real_precision)
+    writeMetric(fake_precision_path, fake_precision)
+    writeMetric(real_recall_path, real_recall)
+    writeMetric(fake_recall_path, fake_recall)
+    writeMetric(real_f1_score_path, real_f1_score)
+    writeMetric(fake_f1_score_path, fake_f1_score)
 
 if __name__ == '__main__':
     main()
