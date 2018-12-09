@@ -147,6 +147,15 @@ def batch_precision_recall_f_score(preds, y):
     y_pred = y_pred.detach().cpu().numpy()
     y_true = y.detach().cpu().numpy()
     precisions, recalls, f1_scores, _ = precision_recall_fscore_support(y_true, y_pred)
+    # In the case that y passed in is all one class, then we still want to return array with 2 elems
+    if len(precisions) != 2:
+        # If this happens because y is not all of one type then we have an issueeee
+        for a in y:
+            if y[0] != a: raise Exception('WHAT THE FUUUUUUCK')
+        if y[0] == 0:
+            return precisions + [0.], recalls + [0.], f1_scores + [0.]
+        else:
+            return [0.] + precisions, [0.] + recalls, [0.] + f1_scores
     return precisions, recalls, f1_scores
 
 # def batch_roc_score(preds, y):
