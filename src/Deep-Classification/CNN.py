@@ -11,6 +11,7 @@ import numpy as np
 import os
 import random
 from sklearn.metrics import precision_recall_fscore_support
+import numpy as np
 
 
 N_EPOCHS = 200000
