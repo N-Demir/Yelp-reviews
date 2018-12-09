@@ -7,10 +7,12 @@ from sklearn.naive_bayes import MultinomialNB
 
 import sys
 import util
+import csv
 
 NUM_KFOLD_SPLITS = 20
 
 spacy_en = spacy.load('en')
+path = '../data/YelpChi/labeled_reviews_balanced.tsv'
 
 def get_words(message):
     """Get the normalized list of words from a message string.
@@ -33,7 +35,7 @@ def create_dictionary(messages):
     """Create a dictionary mapping words to integer indices.
 
     This function should create a dictionary of word to indices using the provided
-    training messages. Use get_words to process each message. 
+    training messages. Use get_words to process each message.
 
     Rare words are often not useful for modeling. Please only add words to the dictionary
     if they occur in at least five messages.
@@ -55,7 +57,7 @@ def create_dictionary(messages):
         for word in unique_words:
             message_counts[word] += 1
 
-            # We have seen it for the fifth time so let us add it to 
+            # We have seen it for the fifth time so let us add it to
             # the index_dict
             if (message_counts[word] == 5):
                 index_dict[word] = index
@@ -67,10 +69,10 @@ def transform_text(messages, word_dictionary):
     """Transform a list of text messages into a numpy array for further processing.
 
     This function should create a numpy array that contains the number of times each word
-    appears in each message. Each row in the resulting array should correspond to each 
+    appears in each message. Each row in the resulting array should correspond to each
     message and each column should correspond to a word.
 
-    Use the provided word dictionary to map words to column indices. Ignore words that 
+    Use the provided word dictionary to map words to column indices. Ignore words that
     are not present in the dictionary. Use get_words to get the words for a message.
 
     Args:
@@ -95,10 +97,10 @@ def transform_text(messages, word_dictionary):
     # *** END CODE HERE ***
 
 def analyze_results(test_reviews, true_labels, predictions):
-    ''' 
+    '''
     Compare the predictions to the true labels and see where we go wrong
 
-    Args: 
+    Args:
         test_reviews: The actual reviews that we analys at test time
         true_labels: The ground truth labeling
         predictions: Our models predictions of the labels
@@ -122,15 +124,16 @@ def analyze_results(test_reviews, true_labels, predictions):
 def main():
     if len(sys.argv) >= 2:
         dataset = sys.argv[1]
-    else: 
+    else:
         dataset = "data/YelpChi/"
 
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
     print('Loading in dataset from {}'.format(dataset))
 
-    reviews, labels = util.load_yelp_dataset_full(dataset)
+    # reviews, labels = util.load_yelp_dataset_full(dataset)
     # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
+    reviews, labels = util.load_tsv_dataset(path)
 
     print('Beginning Naive Bayes training')
 
@@ -152,7 +155,7 @@ def main():
 
         naive_bayes_predictions = clf.predict(test_reviews)
 
-        np.savetxt('./outputs/naive_bayes_predictions', naive_bayes_predictions)
+        np.savetxt('../outputs/naive_bayes_predictions', naive_bayes_predictions)
 
         # analyze_results(test_reviews, test_labels, naive_bayes_predictions)
 
