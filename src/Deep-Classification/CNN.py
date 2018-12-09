@@ -94,8 +94,8 @@ def batch_accuracy(logits, y):
 
 def batch_precision_recall_f_score(preds, y):
     y_pred = torch.round(torch.sigmoid(preds))
-    y_pred = y_pred.detach().numpy()
-    y_true = y.detach().numpy()
+    y_pred = y_pred.detach().cpu().numpy()
+    y_true = y.detach().cpu().numpy()
     precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
     return precision, recall, f1_score
 
