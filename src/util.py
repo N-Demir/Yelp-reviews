@@ -109,9 +109,9 @@ def load_review_dataset_full(folder):
 def accuracy_predictor(true_labels, prections):
 	return np.mean(prections == test_labels)
 
-def precision_recall_fscore(true_labels, prections, average='binary'):
-	precision, recall, fscore, _ = precision_recall_fscore_support(true_labels, prections, average=average)
-	return precision, recall, fscore
+def precision_recall_fscore(true_labels, prections):
+	precisions, recalls, fscores, _ = precision_recall_fscore_support(true_labels, prections)
+	return precisions, recalls, fscores
 
 def write_json(filename, value):
     """Write the provided value as JSON to the given filename"""
