@@ -167,7 +167,7 @@ def evaluate(model, iterator, loss_function):
 
             acc = batch_accuracy(predictions, batch.label)
 
-            precision, recall, f1_score = batch_precision_recall_f_score(predictions, batch.label)
+            precisions, recalls, f1_scores = batch_precision_recall_f_score(predictions, batch.label)
 
             epoch_loss += loss.item()
             epoch_acc += acc.item()
