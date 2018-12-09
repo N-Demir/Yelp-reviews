@@ -1,4 +1,4 @@
-checkpoints/
+models/
 .vector_cache/
 .data/
 .ipynb_checkpoints/

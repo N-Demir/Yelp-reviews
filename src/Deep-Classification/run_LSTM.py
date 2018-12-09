@@ -11,7 +11,7 @@ from datetime import datetime
 from sklearn.metrics import precision_recall_fscore_support
 
 
-EPOCH_SAVE = 10
+EPOCH_SAVE = 5
 EMBEDDING_DIM = 100
 HIDDEN_DIM = 256
 BATCH_SIZE = 64
@@ -71,7 +71,7 @@ def train(model, iterator, loss_function, optimizer):
 		optimizer.step()
 
 		epoch_loss += loss.item()
-		epoch_acc += acc.item()
+		epoch_acc += accuracy.item()
 		epoch_prec += precision
 		epoch_recall += recall
 		epoch_f_score += f1_score
@@ -101,7 +101,7 @@ def evaluate_model(model, iterator, loss_function):
 			precision, recall, f1_score = batch_precision_recall_f_score(logits, batch.label)
 
 			epoch_loss += loss.item()
-			epoch_acc += acc.item()
+			epoch_acc += accuracy.item()
 			epoch_prec += precision
 			epoch_recall += recall
 			epoch_f_score += f1_score
@@ -119,8 +119,8 @@ def batch_accuracy(logits, y):
 
 def batch_precision_recall_f_score(preds, y):
     y_pred = torch.round(torch.sigmoid(preds))
-    y_pred = y_pred.detach().numpy()
-    y_true = y.detach().numpy()
+    y_pred = y_pred.detach().cpu().numpy()
+    y_true = y.detach().cpu().numpy()
     precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
     return precision, recall, f1_score
 
@@ -154,7 +154,7 @@ def main():
 		#val_loss, val_accuracy = evaluate_model(model, valid_itr, loss_function)
 
 		train_loss, train_acc, train_prec, train_recall, train_f_score = train(model, train_itr, loss_function, optimizer)
-		valid_loss, valid_acc, valid_prec, valid_recall, valid_f_score = evaluate(model, valid_itr, loss_function)
+		valid_loss, valid_acc, valid_prec, valid_recall, valid_f_score = evaluate_model(model, valid_itr, loss_function)
 
 		## Here you have accuracy to the losses that we want to save
 
