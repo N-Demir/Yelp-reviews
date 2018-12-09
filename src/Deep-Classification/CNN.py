@@ -100,6 +100,7 @@ def batch_precision_recall_f_score(preds, y):
     # In the case that y passed in is all one class, then we still want to return array with 2 elems
     if len(precisions) != 2:
         # If this happens because y is not all of one type then we have an issueeee
+        print('GOT HEREEE')
         for a in y:
             if y[0] != a: raise Exception('WHAT THE FUUUUUUCK')
         if y[0] == 0:
