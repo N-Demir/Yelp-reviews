@@ -177,14 +177,14 @@ def saveMetrics(prefix, accuracy, precisions, recalls, f1_scores, epoch):
     writeMetric(fake_f1_score_path, fake_f1_score)
 
 def main():
-    if len(sys.argv) >= 2:
-        dataset = sys.argv[1]
-    else:
-        dataset = "data/YelpChi/"
+    # if len(sys.argv) >= 2:
+    #     dataset = sys.argv[1]
+    # else:
+    #     dataset = "data/YelpChi/"
 
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
-    print('Loading in dataset from {}'.format(dataset))
+    print('Loading in dataset from {}'.format(path))
 
     # reviews, labels = util.load_yelp_dataset_full(dataset)
     # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
@@ -239,7 +239,7 @@ def main():
     print('Real reviews with precision {} and recall {} and f_score {}'.format(np.mean(real_precisions), np.mean(real_recalls), np.mean(real_f_scores)))
     print('Fake reviews with precision {} and recall {} and f_score {}'.format(np.mean(fake_precisions), np.mean(fake_recalls), np.mean(fake_f_scores)))
 
-    saveMetrics('valid', avg_accuracy, [np.mean(real_precisions), np.mean(fake_precisions)], [np.mean(real_recalls), p.mean(fake_recalls)], [np.mean(real_f_scores), np.mean(fake_f_scores)], i)
+    saveMetrics('valid', avg_accuracy, [np.mean(real_precisions), np.mean(fake_precisions)], [np.mean(real_recalls), np.mean(fake_recalls)], [np.mean(real_f_scores), np.mean(fake_f_scores)], i)
 
 if __name__ == "__main__":
     main()
