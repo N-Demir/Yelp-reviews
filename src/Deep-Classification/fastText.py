@@ -11,7 +11,7 @@ from datetime import datetime
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import roc_auc_score
 
-EPOCH_SAVE = 25
+EPOCH_SAVE = 10
 EMBEDDING_DIM = 100
 OUTPUT_DIM = 1
 BATCH_SIZE = 64
@@ -126,16 +126,16 @@ def batch_accuracy(preds, y):
 
 def batch_precision_recall_f_score(preds, y):
     y_pred = torch.round(torch.sigmoid(preds))
-    y_pred = y_pred.detach().numpy()
-    y_true = y.detach().numpy()
+    y_pred = y_pred.detach().cpu().numpy()
+    y_true = y.detach().cpu().numpy()
     precision, recall, f1_score, _ = precision_recall_fscore_support(y_true, y_pred, average='binary')
     return precision, recall, f1_score
 
-def batch_roc_score(preds, y):
-    y_pred = torch.round(torch.sigmoid(preds))
-    y_pred = y_pred.detach().numpy()
-    y_true = y.detach().numpy() 
-    roc_score = roc_auc_score(y_true, y_pred)
+# def batch_roc_score(preds, y):
+#     y_pred = torch.round(torch.sigmoid(preds))
+#     y_pred = y_pred.detach().numpy()
+#     y_true = y.detach().numpy() 
+#     roc_score = roc_auc_score(y_true, y_pred)
 
 def main():
     def generate_bigrams(x):
