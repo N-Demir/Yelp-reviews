@@ -19,9 +19,7 @@ BATCH_SIZE = 64
 # To see if we match the results from online
 #SEED = 1234
 SEED = 229
-TRAIN_VAL_TEST_SPLIT = [0.9, 0.05, 0.05]
-TRAIN_SPLIT = 0.9
-VAL_TEST_SPLIT = 0.5
+TRAIN_VAL_TEST_SPLIT = [0.7, 0.15, 0.15]
 
 # Sets the random number generator of torch
 #torch.manual_seed(SEED)

@@ -109,7 +109,7 @@ def evaluate_model(model, iterator, loss_function):
 			logits = logits.squeeze(1)
 
 			loss = loss_function(logits, labels)
-			accuracy = loss_function(logits, labels)
+			accuracy = batch_accuracy(logits, labels)
 			precisions, recalls, f1_scores = batch_precision_recall_f_score(logits, batch.label)
 
 			epoch_loss += loss.item()
