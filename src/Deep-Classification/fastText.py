@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import roc_auc_score
+import numpy as np
 
 EPOCH_SAVE = 10
 EMBEDDING_DIM = 100
