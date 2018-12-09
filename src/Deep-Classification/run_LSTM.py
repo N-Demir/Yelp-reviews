@@ -9,6 +9,7 @@ import data_loader
 from pathlib import Path
 from datetime import datetime
 from sklearn.metrics import precision_recall_fscore_support
+import numpy as np
 
 
 EPOCH_SAVE = 5
