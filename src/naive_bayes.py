@@ -16,7 +16,7 @@ CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 REPOSITORY_NAME = 'Yelp-reviews'
 
 spacy_en = spacy.load('en')
-path = '../data/YelpChi/labeled_reviews_balanced.tsv'
+path = '../data/large_balanced.tsv'
 
 def get_words(message):
     """Get the normalized list of words from a message string.
