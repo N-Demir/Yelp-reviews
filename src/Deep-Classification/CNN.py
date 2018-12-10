@@ -170,6 +170,11 @@ def evaluate(model, iterator, loss_function):
     with torch.no_grad():
 
         for batch in iterator:
+             #Complete hack
+             if batch.text.shape[0] <= 5: 
+                 print('Moving on in life')
+                 continue
+
 
             predictions = model(batch.text).squeeze(1)
 
