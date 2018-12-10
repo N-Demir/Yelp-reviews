@@ -5,6 +5,8 @@ import sys
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold
 from behavioral_analysis import getReviewerStats
+from sklearn.preprocessing import normalize
+from sklearn.feature_extraction.text import CountVectorizer
 
 import numpy as np
 
@@ -133,7 +135,7 @@ def get_behavior_features(reviewerIDs, reviewerStats):
     fullFeatures = []
     for i, reviewerID in enumerate(reviewerIDs):
         fullFeatures.append(reviewerStats[reviewerID])
-    return fullFeatures
+    return np.array(fullFeatures)
 
 def main():
     if len(sys.argv) >= 2:
@@ -147,7 +149,7 @@ def main():
 
     # reviews, labels = util.load_yelp_dataset_full("data/YelpChi/")
     # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
-    reviews, labels, reviewerIDs, dates, productIDs, ratings = util.load_behavioral_tsv_dataset('../data/large_behavior_balanced.tsv')
+    reviews, labels, reviewerIDs, dates, productIDs, ratings = util.load_behavioral_tsv_dataset('../data/YelpChi/labeled_behavioral_reviews.tsv')
 
     print('Beginning Logistic Regression training')
 
@@ -167,14 +169,21 @@ def main():
 
         train_reviewerStats = getReviewerStats(train_reviews, train_labels, train_reviewerIDs, train_dates, train_productIDs, train_ratings)
 
-        #top_words = get_top_words(train_reviews, n=LENGTH_OF_FEATURE_VECTOR)
+        # top_words = get_top_words(train_reviews, n=LENGTH_OF_FEATURE_VECTOR)
 
-        #training_word_features = get_features(train_reviews, top_words)
-        training_features = get_behavior_features(train_reviewerIDs, train_reviewerStats)
-        #test_word_features = get_features(test_reviews, top_words)
-        test_features = get_behavior_features(test_reviewerIDs, reviewer_stats)
+        vectorizer = CountVectorizer()
+        vectorizer.fit(train_reviews)
 
-        logreg = LogisticRegression(solver='lbfgs', max_iter=MAX_ITERATIONS)
+        training_word_features = vectorizer.transform(train_reviews).todense()#get_features(train_reviews, top_words)
+        training_behavior_features = get_behavior_features(train_reviewerIDs, train_reviewerStats)
+        test_word_features = vectorizer.transform(test_reviews).todense()#get_features(test_reviews, top_words)
+        test_behavior_features = get_behavior_features(test_reviewerIDs, reviewer_stats)
+        training_features = np.concatenate([training_word_features, training_behavior_features], axis = 1)
+        test_features = np.concatenate([test_word_features, test_behavior_features], axis = 1)
+        training_features = normalize(training_features)
+        test_features = normalize(test_features)
+
+        logreg = LogisticRegression(solver='lbfgs', max_iter=MAX_ITERATIONS, verbose = True)
         logreg.fit(training_features, train_labels)
         y_pred = logreg.predict(test_features)
 
