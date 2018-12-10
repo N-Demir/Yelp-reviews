@@ -7,6 +7,11 @@ pathMetaNYC = '../data/YelpNYC/metadata'
 pathReviewNYC = '../data/YelpNYC/reviewContent'
 outpath = '../data/large_behavior_balanced.tsv'
 
+'''
+Writes a file to outfile containing data from Chicago and NYC file. It includes the necessary information
+to calculate the 5 behavioral statistics
+'''
+
 def main():
     true_reviews = []
     fake_reviews = []
