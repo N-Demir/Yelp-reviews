@@ -1,0 +1,270 @@
+[2018-12-10 08:37:53,233 INFO] Loading checkpoint from test-train-model_step_25000.pt
+[2018-12-10 08:37:59,543 INFO] Loading train dataset from data/model.train.0.pt, number of examples: 295366
+[2018-12-10 08:37:59,543 INFO] Loading vocab from checkpoint at test-train-model_step_25000.pt.
+[2018-12-10 08:37:59,571 INFO]  * vocabulary size. source = 22267; target = 28806
+[2018-12-10 08:37:59,571 INFO] Building model...
+[2018-12-10 08:38:04,854 INFO] NMTModel(
+  (encoder): RNNEncoder(
+    (embeddings): Embeddings(
+      (make_embedding): Sequential(
+        (emb_luts): Elementwise(
+          (0): Embedding(22267, 500, padding_idx=1)
+        )
+      )
+    )
+    (rnn): LSTM(500, 500, num_layers=2, dropout=0.3)
+  )
+  (decoder): InputFeedRNNDecoder(
+    (embeddings): Embeddings(
+      (make_embedding): Sequential(
+        (emb_luts): Elementwise(
+          (0): Embedding(28806, 500, padding_idx=1)
+        )
+      )
+    )
+    (dropout): Dropout(p=0.3)
+    (rnn): StackedLSTM(
+      (dropout): Dropout(p=0.3)
+      (layers): ModuleList(
+        (0): LSTMCell(1000, 500)
+        (1): LSTMCell(500, 500)
+      )
+    )
+    (attn): GlobalAttention(
+      (linear_in): Linear(in_features=500, out_features=500, bias=False)
+      (linear_out): Linear(in_features=1000, out_features=500, bias=False)
+    )
+  )
+  (generator): Sequential(
+    (0): Linear(in_features=500, out_features=28806, bias=True)
+    (1): LogSoftmax()
+  )
+)
+[2018-12-10 08:38:04,861 INFO] encoder: 15141500
+[2018-12-10 08:38:04,861 INFO] decoder: 34592806
+[2018-12-10 08:38:04,861 INFO] * number of parameters: 49734306
+[2018-12-10 08:38:05,328 INFO] Starting training on GPU: [0, 1, 2, 3]
+[2018-12-10 08:38:05,328 INFO] Start training...
+[2018-12-10 08:38:11,860 INFO] Loading train dataset from data/model.train.0.pt, number of examples: 295366
+[2018-12-10 08:39:00,030 INFO] Step 25050/500000; acc:  32.94; ppl: 31.12; xent: 3.44; lr: 0.00100; 6618/18092 tok/s;     48 sec
+[2018-12-10 08:39:46,647 INFO] Step 25100/500000; acc:  33.11; ppl: 30.35; xent: 3.41; lr: 0.00100; 6918/19176 tok/s;     95 sec
+[2018-12-10 08:40:32,839 INFO] Step 25150/500000; acc:  33.18; ppl: 30.10; xent: 3.40; lr: 0.00100; 6952/19114 tok/s;    141 sec
+[2018-12-10 08:41:19,106 INFO] Step 25200/500000; acc:  33.39; ppl: 29.54; xent: 3.39; lr: 0.00100; 6963/19055 tok/s;    187 sec
+[2018-12-10 08:42:06,230 INFO] Step 25250/500000; acc:  33.25; ppl: 30.01; xent: 3.40; lr: 0.00100; 6949/18768 tok/s;    234 sec
+[2018-12-10 08:42:52,839 INFO] Step 25300/500000; acc:  33.29; ppl: 29.71; xent: 3.39; lr: 0.00100; 6865/19065 tok/s;    281 sec
+[2018-12-10 08:43:39,372 INFO] Step 25350/500000; acc:  33.40; ppl: 29.32; xent: 3.38; lr: 0.00100; 6692/18626 tok/s;    328 sec
+[2018-12-10 08:44:27,294 INFO] Step 25400/500000; acc:  33.42; ppl: 29.17; xent: 3.37; lr: 0.00100; 6467/18126 tok/s;    375 sec
+[2018-12-10 08:45:13,849 INFO] Step 25450/500000; acc:  33.48; ppl: 29.03; xent: 3.37; lr: 0.00100; 6651/18435 tok/s;    422 sec
+[2018-12-10 08:46:01,780 INFO] Step 25500/500000; acc:  33.41; ppl: 29.37; xent: 3.38; lr: 0.00100; 6856/18299 tok/s;    470 sec
+[2018-12-10 08:46:48,929 INFO] Step 25550/500000; acc:  33.56; ppl: 28.71; xent: 3.36; lr: 0.00100; 6875/19197 tok/s;    517 sec
+[2018-12-10 08:47:21,809 INFO] Loading train dataset from data/model.train.1.pt, number of examples: 257550
+[2018-12-10 08:47:44,266 INFO] Step 25600/500000; acc:  33.53; ppl: 29.10; xent: 3.37; lr: 0.00100; 6051/16100 tok/s;    572 sec
+[2018-12-10 08:48:30,573 INFO] Step 25650/500000; acc:  33.47; ppl: 28.88; xent: 3.36; lr: 0.00100; 7056/19136 tok/s;    619 sec
+[2018-12-10 08:49:17,488 INFO] Step 25700/500000; acc:  33.43; ppl: 29.00; xent: 3.37; lr: 0.00100; 6922/18896 tok/s;    666 sec
+[2018-12-10 08:50:04,667 INFO] Step 25750/500000; acc:  33.54; ppl: 28.69; xent: 3.36; lr: 0.00100; 6880/18810 tok/s;    713 sec
+[2018-12-10 08:50:51,299 INFO] Step 25800/500000; acc:  33.53; ppl: 28.59; xent: 3.35; lr: 0.00100; 7031/19145 tok/s;    759 sec
+[2018-12-10 08:51:38,264 INFO] Step 25850/500000; acc:  33.47; ppl: 28.46; xent: 3.35; lr: 0.00100; 6843/19227 tok/s;    806 sec
+[2018-12-10 08:52:25,051 INFO] Step 25900/500000; acc:  33.56; ppl: 28.29; xent: 3.34; lr: 0.00100; 6795/19420 tok/s;    853 sec
+[2018-12-10 08:53:11,331 INFO] Step 25950/500000; acc:  33.51; ppl: 28.31; xent: 3.34; lr: 0.00100; 6848/19154 tok/s;    899 sec
+[2018-12-10 08:53:58,174 INFO] Step 26000/500000; acc:  33.70; ppl: 28.13; xent: 3.34; lr: 0.00100; 6863/19109 tok/s;    946 sec
+[2018-12-10 08:54:44,279 INFO] Step 26050/500000; acc:  33.67; ppl: 27.89; xent: 3.33; lr: 0.00100; 7020/19493 tok/s;    992 sec
+[2018-12-10 08:55:29,034 INFO] Loading train dataset from data/model.train.2.pt, number of examples: 250806
+[2018-12-10 08:55:47,330 INFO] Step 26100/500000; acc:  33.51; ppl: 28.88; xent: 3.36; lr: 0.00100; 5009/14411 tok/s;   1055 sec
+[2018-12-10 08:56:33,497 INFO] Step 26150/500000; acc:  33.45; ppl: 29.32; xent: 3.38; lr: 0.00100; 6964/19106 tok/s;   1102 sec
+[2018-12-10 08:57:19,598 INFO] Step 26200/500000; acc:  33.49; ppl: 29.08; xent: 3.37; lr: 0.00100; 6900/18969 tok/s;   1148 sec
+[2018-12-10 08:58:06,856 INFO] Step 26250/500000; acc:  33.48; ppl: 29.16; xent: 3.37; lr: 0.00100; 6929/19132 tok/s;   1195 sec
+[2018-12-10 08:58:54,561 INFO] Step 26300/500000; acc:  33.46; ppl: 29.03; xent: 3.37; lr: 0.00100; 6812/19050 tok/s;   1243 sec
+[2018-12-10 08:59:41,268 INFO] Step 26350/500000; acc:  33.49; ppl: 28.92; xent: 3.36; lr: 0.00100; 7082/19314 tok/s;   1289 sec
+[2018-12-10 09:00:28,414 INFO] Step 26400/500000; acc:  33.48; ppl: 29.04; xent: 3.37; lr: 0.00100; 6672/19036 tok/s;   1337 sec
+[2018-12-10 09:01:14,510 INFO] Step 26450/500000; acc:  33.64; ppl: 28.63; xent: 3.35; lr: 0.00100; 7018/18954 tok/s;   1383 sec
+[2018-12-10 09:02:01,414 INFO] Step 26500/500000; acc:  33.66; ppl: 28.42; xent: 3.35; lr: 0.00100; 6929/18432 tok/s;   1430 sec
+[2018-12-10 09:02:48,458 INFO] Step 26550/500000; acc:  33.55; ppl: 28.70; xent: 3.36; lr: 0.00100; 7091/18687 tok/s;   1477 sec
+[2018-12-10 09:03:18,439 INFO] Loading train dataset from data/model.train.3.pt, number of examples: 154444
+[2018-12-10 09:03:46,385 INFO] Step 26600/500000; acc:  33.48; ppl: 29.25; xent: 3.38; lr: 0.00100; 5533/15377 tok/s;   1535 sec
+[2018-12-10 09:04:33,646 INFO] Step 26650/500000; acc:  33.24; ppl: 29.92; xent: 3.40; lr: 0.00100; 6794/18606 tok/s;   1582 sec
+[2018-12-10 09:05:20,654 INFO] Step 26700/500000; acc:  33.33; ppl: 29.52; xent: 3.39; lr: 0.00100; 6755/18408 tok/s;   1629 sec
+[2018-12-10 09:06:07,564 INFO] Step 26750/500000; acc:  33.20; ppl: 29.73; xent: 3.39; lr: 0.00100; 6742/19644 tok/s;   1676 sec
+[2018-12-10 09:06:54,664 INFO] Step 26800/500000; acc:  33.48; ppl: 28.94; xent: 3.37; lr: 0.00100; 6835/18749 tok/s;   1723 sec
+[2018-12-10 09:07:41,543 INFO] Step 26850/500000; acc:  33.52; ppl: 28.88; xent: 3.36; lr: 0.00100; 6845/18976 tok/s;   1770 sec
+[2018-12-10 09:08:09,460 INFO] Loading train dataset from data/model.train.0.pt, number of examples: 295366
+[2018-12-10 09:08:36,981 INFO] Step 26900/500000; acc:  33.56; ppl: 28.64; xent: 3.35; lr: 0.00100; 5697/15376 tok/s;   1825 sec
+[2018-12-10 09:09:24,036 INFO] Step 26950/500000; acc:  33.67; ppl: 28.28; xent: 3.34; lr: 0.00100; 6834/18728 tok/s;   1872 sec
+[2018-12-10 09:10:10,999 INFO] Step 27000/500000; acc:  33.85; ppl: 27.92; xent: 3.33; lr: 0.00100; 6810/19549 tok/s;   1919 sec
+[2018-12-10 09:10:56,987 INFO] Step 27050/500000; acc:  33.96; ppl: 27.46; xent: 3.31; lr: 0.00100; 7169/18768 tok/s;   1965 sec
+[2018-12-10 09:11:43,823 INFO] Step 27100/500000; acc:  33.85; ppl: 27.77; xent: 3.32; lr: 0.00100; 6864/18897 tok/s;   2012 sec
+[2018-12-10 09:12:30,723 INFO] Step 27150/500000; acc:  33.88; ppl: 27.67; xent: 3.32; lr: 0.00100; 6774/19029 tok/s;   2059 sec
+[2018-12-10 09:13:17,761 INFO] Step 27200/500000; acc:  33.84; ppl: 27.66; xent: 3.32; lr: 0.00100; 6913/18843 tok/s;   2106 sec
+[2018-12-10 09:14:03,920 INFO] Step 27250/500000; acc:  33.92; ppl: 27.36; xent: 3.31; lr: 0.00100; 6616/18595 tok/s;   2152 sec
+[2018-12-10 09:14:50,332 INFO] Step 27300/500000; acc:  34.12; ppl: 27.05; xent: 3.30; lr: 0.00100; 6571/18277 tok/s;   2198 sec
+[2018-12-10 09:15:36,699 INFO] Step 27350/500000; acc:  33.95; ppl: 27.38; xent: 3.31; lr: 0.00100; 6894/19029 tok/s;   2245 sec
+[2018-12-10 09:16:24,622 INFO] Step 27400/500000; acc:  33.97; ppl: 27.24; xent: 3.30; lr: 0.00100; 6766/18726 tok/s;   2293 sec
+[2018-12-10 09:17:17,227 INFO] Loading train dataset from data/model.train.1.pt, number of examples: 257550
+[2018-12-10 09:17:19,041 INFO] Step 27450/500000; acc:  34.06; ppl: 26.95; xent: 3.29; lr: 0.00100; 6095/16342 tok/s;   2347 sec
+[2018-12-10 09:18:06,249 INFO] Step 27500/500000; acc:  33.81; ppl: 27.81; xent: 3.33; lr: 0.00100; 7090/18829 tok/s;   2394 sec
+[2018-12-10 09:18:52,656 INFO] Step 27550/500000; acc:  33.88; ppl: 27.67; xent: 3.32; lr: 0.00100; 7133/19161 tok/s;   2441 sec
+[2018-12-10 09:19:39,811 INFO] Step 27600/500000; acc:  33.85; ppl: 27.50; xent: 3.31; lr: 0.00100; 6756/18692 tok/s;   2488 sec
+[2018-12-10 09:20:26,637 INFO] Step 27650/500000; acc:  34.03; ppl: 27.18; xent: 3.30; lr: 0.00100; 7023/19020 tok/s;   2535 sec
+[2018-12-10 09:21:13,700 INFO] Step 27700/500000; acc:  33.96; ppl: 27.15; xent: 3.30; lr: 0.00100; 6746/19189 tok/s;   2582 sec
+[2018-12-10 09:22:00,453 INFO] Step 27750/500000; acc:  33.89; ppl: 27.05; xent: 3.30; lr: 0.00100; 6928/19336 tok/s;   2629 sec
+[2018-12-10 09:22:47,001 INFO] Step 27800/500000; acc:  33.99; ppl: 26.97; xent: 3.29; lr: 0.00100; 6723/19289 tok/s;   2675 sec
+[2018-12-10 09:23:34,167 INFO] Step 27850/500000; acc:  34.05; ppl: 26.87; xent: 3.29; lr: 0.00100; 6889/18886 tok/s;   2722 sec
+[2018-12-10 09:24:21,287 INFO] Step 27900/500000; acc:  34.13; ppl: 26.51; xent: 3.28; lr: 0.00100; 6814/19089 tok/s;   2769 sec
+[2018-12-10 09:25:07,394 INFO] Step 27950/500000; acc:  34.10; ppl: 26.71; xent: 3.28; lr: 0.00100; 6992/19340 tok/s;   2816 sec
+[2018-12-10 09:25:23,584 INFO] Loading train dataset from data/model.train.2.pt, number of examples: 250806
+[2018-12-10 09:26:08,091 INFO] Step 28000/500000; acc:  33.74; ppl: 28.05; xent: 3.33; lr: 0.00100; 5169/14741 tok/s;   2876 sec
+[2018-12-10 09:26:54,600 INFO] Step 28050/500000; acc:  33.90; ppl: 27.73; xent: 3.32; lr: 0.00100; 6962/18792 tok/s;   2923 sec
+[2018-12-10 09:27:41,844 INFO] Step 28100/500000; acc:  33.91; ppl: 27.76; xent: 3.32; lr: 0.00100; 6726/19050 tok/s;   2970 sec
+[2018-12-10 09:28:29,465 INFO] Step 28150/500000; acc:  33.81; ppl: 27.66; xent: 3.32; lr: 0.00100; 6964/18919 tok/s;   3018 sec
+[2018-12-10 09:29:16,999 INFO] Step 28200/500000; acc:  33.93; ppl: 27.48; xent: 3.31; lr: 0.00100; 7045/19122 tok/s;   3065 sec
+[2018-12-10 09:30:04,377 INFO] Step 28250/500000; acc:  33.89; ppl: 27.51; xent: 3.31; lr: 0.00100; 6703/19430 tok/s;   3113 sec
+[2018-12-10 09:30:50,268 INFO] Step 28300/500000; acc:  33.95; ppl: 27.43; xent: 3.31; lr: 0.00100; 6874/18999 tok/s;   3158 sec
+[2018-12-10 09:31:36,594 INFO] Step 28350/500000; acc:  34.19; ppl: 26.93; xent: 3.29; lr: 0.00100; 6921/18762 tok/s;   3205 sec
+[2018-12-10 09:32:23,730 INFO] Step 28400/500000; acc:  34.01; ppl: 27.06; xent: 3.30; lr: 0.00100; 7091/18453 tok/s;   3252 sec
+[2018-12-10 09:33:13,078 INFO] Loading train dataset from data/model.train.3.pt, number of examples: 154444
+[2018-12-10 09:33:20,231 INFO] Step 28450/500000; acc:  34.13; ppl: 27.11; xent: 3.30; lr: 0.00100; 5680/15662 tok/s;   3308 sec
+[2018-12-10 09:34:07,845 INFO] Step 28500/500000; acc:  33.62; ppl: 28.47; xent: 3.35; lr: 0.00100; 6853/18619 tok/s;   3356 sec
+[2018-12-10 09:34:55,220 INFO] Step 28550/500000; acc:  33.77; ppl: 27.97; xent: 3.33; lr: 0.00100; 6761/18352 tok/s;   3403 sec
+[2018-12-10 09:35:41,392 INFO] Step 28600/500000; acc:  33.68; ppl: 28.07; xent: 3.33; lr: 0.00100; 6766/19160 tok/s;   3450 sec
+[2018-12-10 09:36:28,911 INFO] Step 28650/500000; acc:  33.87; ppl: 27.51; xent: 3.31; lr: 0.00100; 6825/19136 tok/s;   3497 sec
+[2018-12-10 09:37:15,759 INFO] Step 28700/500000; acc:  33.91; ppl: 27.26; xent: 3.31; lr: 0.00100; 6842/18923 tok/s;   3544 sec
+[2018-12-10 09:38:04,228 INFO] Loading train dataset from data/model.train.0.pt, number of examples: 295366
+[2018-12-10 09:38:10,939 INFO] Step 28750/500000; acc:  33.96; ppl: 27.20; xent: 3.30; lr: 0.00100; 5735/15702 tok/s;   3599 sec
+[2018-12-10 09:38:58,351 INFO] Step 28800/500000; acc:  34.02; ppl: 27.23; xent: 3.30; lr: 0.00100; 6653/18738 tok/s;   3646 sec
+[2018-12-10 09:39:44,928 INFO] Step 28850/500000; acc:  34.16; ppl: 26.74; xent: 3.29; lr: 0.00100; 6933/19070 tok/s;   3693 sec
+[2018-12-10 09:40:30,752 INFO] Step 28900/500000; acc:  34.23; ppl: 26.65; xent: 3.28; lr: 0.00100; 7021/19078 tok/s;   3739 sec
+[2018-12-10 09:41:17,700 INFO] Step 28950/500000; acc:  34.21; ppl: 26.49; xent: 3.28; lr: 0.00100; 6891/19079 tok/s;   3786 sec
+[2018-12-10 09:42:04,561 INFO] Step 29000/500000; acc:  34.26; ppl: 26.60; xent: 3.28; lr: 0.00100; 6951/18615 tok/s;   3833 sec
+[2018-12-10 09:42:51,456 INFO] Step 29050/500000; acc:  34.24; ppl: 26.49; xent: 3.28; lr: 0.00100; 6958/19052 tok/s;   3880 sec
+[2018-12-10 09:43:37,335 INFO] Step 29100/500000; acc:  34.39; ppl: 26.20; xent: 3.27; lr: 0.00100; 6646/18886 tok/s;   3925 sec
+[2018-12-10 09:44:23,887 INFO] Step 29150/500000; acc:  34.38; ppl: 26.04; xent: 3.26; lr: 0.00100; 6515/18595 tok/s;   3972 sec
+[2018-12-10 09:45:10,205 INFO] Step 29200/500000; acc:  34.35; ppl: 26.10; xent: 3.26; lr: 0.00100; 6749/18801 tok/s;   4018 sec
+[2018-12-10 09:45:57,277 INFO] Step 29250/500000; acc:  34.37; ppl: 26.18; xent: 3.27; lr: 0.00100; 7081/18498 tok/s;   4065 sec
+[2018-12-10 09:46:44,104 INFO] Step 29300/500000; acc:  34.38; ppl: 25.86; xent: 3.25; lr: 0.00100; 6870/19348 tok/s;   4112 sec
+[2018-12-10 09:47:10,578 INFO] Loading train dataset from data/model.train.1.pt, number of examples: 257550
+[2018-12-10 09:47:38,570 INFO] Step 29350/500000; acc:  34.21; ppl: 26.56; xent: 3.28; lr: 0.00100; 6225/16382 tok/s;   4167 sec
+[2018-12-10 09:48:24,988 INFO] Step 29400/500000; acc:  34.13; ppl: 26.65; xent: 3.28; lr: 0.00100; 6986/19033 tok/s;   4213 sec
+[2018-12-10 09:49:12,214 INFO] Step 29450/500000; acc:  34.16; ppl: 26.63; xent: 3.28; lr: 0.00100; 6884/18653 tok/s;   4260 sec
+[2018-12-10 09:49:58,959 INFO] Step 29500/500000; acc:  34.29; ppl: 26.37; xent: 3.27; lr: 0.00100; 7045/18948 tok/s;   4307 sec
+[2018-12-10 09:50:45,754 INFO] Step 29550/500000; acc:  34.33; ppl: 26.10; xent: 3.26; lr: 0.00100; 6874/19325 tok/s;   4354 sec
+[2018-12-10 09:51:32,774 INFO] Step 29600/500000; acc:  34.27; ppl: 26.15; xent: 3.26; lr: 0.00100; 6829/19213 tok/s;   4401 sec
+[2018-12-10 09:52:19,240 INFO] Step 29650/500000; acc:  34.37; ppl: 25.95; xent: 3.26; lr: 0.00100; 6795/19277 tok/s;   4447 sec
+[2018-12-10 09:53:05,857 INFO] Step 29700/500000; acc:  34.37; ppl: 25.81; xent: 3.25; lr: 0.00100; 6937/19085 tok/s;   4494 sec
+[2018-12-10 09:53:52,793 INFO] Step 29750/500000; acc:  34.44; ppl: 25.70; xent: 3.25; lr: 0.00100; 6793/19031 tok/s;   4541 sec
+[2018-12-10 09:54:38,827 INFO] Step 29800/500000; acc:  34.51; ppl: 25.56; xent: 3.24; lr: 0.00100; 6974/19605 tok/s;   4587 sec
+[2018-12-10 09:55:15,939 INFO] Loading train dataset from data/model.train.2.pt, number of examples: 250806
+[2018-12-10 09:55:40,125 INFO] Step 29850/500000; acc:  34.26; ppl: 26.48; xent: 3.28; lr: 0.00100; 5269/14883 tok/s;   4648 sec
+[2018-12-10 09:56:26,758 INFO] Step 29900/500000; acc:  34.15; ppl: 26.86; xent: 3.29; lr: 0.00100; 6860/18855 tok/s;   4695 sec
+[2018-12-10 09:57:13,046 INFO] Step 29950/500000; acc:  34.27; ppl: 26.50; xent: 3.28; lr: 0.00100; 6788/18978 tok/s;   4741 sec
+[2018-12-10 09:58:00,553 INFO] Step 30000/500000; acc:  34.18; ppl: 26.60; xent: 3.28; lr: 0.00100; 6917/18937 tok/s;   4789 sec
+[2018-12-10 09:58:00,726 INFO] Loading valid dataset from data/model.valid.0.pt, number of examples: 5327
+[2018-12-10 09:58:25,039 INFO] Validation perplexity: 26.1962
+[2018-12-10 09:58:25,039 INFO] Validation accuracy: 34.7663
+[2018-12-10 09:58:25,040 INFO] Saving checkpoint test-train-model_step_30000.pt
+[2018-12-10 09:59:14,829 INFO] Step 30050/500000; acc:  34.18; ppl: 26.48; xent: 3.28; lr: 0.00100; 4474/12226 tok/s;   4863 sec
+[2018-12-10 10:00:01,350 INFO] Step 30100/500000; acc:  34.25; ppl: 26.33; xent: 3.27; lr: 0.00100; 6973/19715 tok/s;   4909 sec
+[2018-12-10 10:00:48,347 INFO] Step 30150/500000; acc:  34.20; ppl: 26.46; xent: 3.28; lr: 0.00100; 6758/18806 tok/s;   4956 sec
+[2018-12-10 10:01:34,664 INFO] Step 30200/500000; acc:  34.50; ppl: 25.93; xent: 3.26; lr: 0.00100; 6810/18778 tok/s;   5003 sec
+[2018-12-10 10:02:21,616 INFO] Step 30250/500000; acc:  34.45; ppl: 25.85; xent: 3.25; lr: 0.00100; 7084/18513 tok/s;   5050 sec
+[2018-12-10 10:03:08,441 INFO] Step 30300/500000; acc:  34.46; ppl: 25.95; xent: 3.26; lr: 0.00100; 6991/18786 tok/s;   5097 sec
+[2018-12-10 10:03:31,721 INFO] Loading train dataset from data/model.train.3.pt, number of examples: 154444
+[2018-12-10 10:04:05,440 INFO] Step 30350/500000; acc:  34.11; ppl: 26.92; xent: 3.29; lr: 0.00100; 5653/15704 tok/s;   5154 sec
+[2018-12-10 10:04:52,811 INFO] Step 30400/500000; acc:  34.10; ppl: 27.00; xent: 3.30; lr: 0.00100; 6750/18293 tok/s;   5201 sec
+[2018-12-10 10:05:39,781 INFO] Step 30450/500000; acc:  34.10; ppl: 26.76; xent: 3.29; lr: 0.00100; 6782/18645 tok/s;   5248 sec
+[2018-12-10 10:06:26,982 INFO] Step 30500/500000; acc:  34.09; ppl: 26.79; xent: 3.29; lr: 0.00100; 6787/19530 tok/s;   5295 sec
+[2018-12-10 10:07:13,861 INFO] Step 30550/500000; acc:  34.30; ppl: 26.15; xent: 3.26; lr: 0.00100; 6731/18938 tok/s;   5342 sec
+[2018-12-10 10:08:00,621 INFO] Step 30600/500000; acc:  34.39; ppl: 26.07; xent: 3.26; lr: 0.00100; 6916/18869 tok/s;   5389 sec
+[2018-12-10 10:08:22,866 INFO] Loading train dataset from data/model.train.0.pt, number of examples: 295366
+[2018-12-10 10:08:56,232 INFO] Step 30650/500000; acc:  34.35; ppl: 26.19; xent: 3.27; lr: 0.00100; 5742/15375 tok/s;   5444 sec
+[2018-12-10 10:09:42,494 INFO] Step 30700/500000; acc:  34.33; ppl: 26.19; xent: 3.27; lr: 0.00100; 6900/18912 tok/s;   5491 sec
+[2018-12-10 10:10:30,311 INFO] Step 30750/500000; acc:  34.45; ppl: 25.85; xent: 3.25; lr: 0.00100; 6787/19294 tok/s;   5538 sec
+[2018-12-10 10:11:16,043 INFO] Step 30800/500000; acc:  34.75; ppl: 25.36; xent: 3.23; lr: 0.00100; 7074/18799 tok/s;   5584 sec
+[2018-12-10 10:12:02,910 INFO] Step 30850/500000; acc:  34.52; ppl: 25.73; xent: 3.25; lr: 0.00100; 6865/19047 tok/s;   5631 sec
+[2018-12-10 10:12:50,023 INFO] Step 30900/500000; acc:  34.60; ppl: 25.46; xent: 3.24; lr: 0.00100; 6794/18680 tok/s;   5678 sec
+[2018-12-10 10:13:36,605 INFO] Step 30950/500000; acc:  34.57; ppl: 25.60; xent: 3.24; lr: 0.00100; 6867/19206 tok/s;   5725 sec
+[2018-12-10 10:14:23,146 INFO] Step 31000/500000; acc:  34.72; ppl: 25.21; xent: 3.23; lr: 0.00100; 6542/18445 tok/s;   5771 sec
+[2018-12-10 10:15:09,398 INFO] Step 31050/500000; acc:  34.83; ppl: 24.93; xent: 3.22; lr: 0.00100; 6622/18285 tok/s;   5818 sec
+[2018-12-10 10:15:56,497 INFO] Step 31100/500000; acc:  34.61; ppl: 25.34; xent: 3.23; lr: 0.00100; 6882/18781 tok/s;   5865 sec
+[2018-12-10 10:16:44,358 INFO] Step 31150/500000; acc:  34.66; ppl: 25.16; xent: 3.23; lr: 0.00100; 6817/18661 tok/s;   5912 sec
+[2018-12-10 10:17:31,484 INFO] Loading train dataset from data/model.train.1.pt, number of examples: 257550
+[2018-12-10 10:17:38,558 INFO] Step 31200/500000; acc:  34.81; ppl: 24.96; xent: 3.22; lr: 0.00100; 6029/16514 tok/s;   5967 sec
+[2018-12-10 10:18:25,738 INFO] Step 31250/500000; acc:  34.34; ppl: 26.02; xent: 3.26; lr: 0.00100; 7202/18744 tok/s;   6014 sec
+[2018-12-10 10:19:12,509 INFO] Step 31300/500000; acc:  34.42; ppl: 25.97; xent: 3.26; lr: 0.00100; 6984/18931 tok/s;   6061 sec
+[2018-12-10 10:19:59,384 INFO] Step 31350/500000; acc:  34.53; ppl: 25.56; xent: 3.24; lr: 0.00100; 6835/19001 tok/s;   6108 sec
+[2018-12-10 10:20:46,441 INFO] Step 31400/500000; acc:  34.58; ppl: 25.45; xent: 3.24; lr: 0.00100; 6962/18939 tok/s;   6155 sec
+[2018-12-10 10:21:32,957 INFO] Step 31450/500000; acc:  34.60; ppl: 25.29; xent: 3.23; lr: 0.00100; 6877/19427 tok/s;   6201 sec
+[2018-12-10 10:22:20,709 INFO] Step 31500/500000; acc:  34.61; ppl: 25.17; xent: 3.23; lr: 0.00100; 6704/19012 tok/s;   6249 sec
+[2018-12-10 10:23:07,373 INFO] Step 31550/500000; acc:  34.64; ppl: 25.06; xent: 3.22; lr: 0.00100; 6783/19024 tok/s;   6296 sec
+[2018-12-10 10:23:54,663 INFO] Step 31600/500000; acc:  34.71; ppl: 25.01; xent: 3.22; lr: 0.00100; 6811/18878 tok/s;   6343 sec
+[2018-12-10 10:24:41,906 INFO] Step 31650/500000; acc:  34.82; ppl: 24.73; xent: 3.21; lr: 0.00100; 6911/19153 tok/s;   6390 sec
+[2018-12-10 10:25:38,295 INFO] Loading train dataset from data/model.train.2.pt, number of examples: 250806
+[2018-12-10 10:25:41,849 INFO] Step 31700/500000; acc:  34.76; ppl: 25.01; xent: 3.22; lr: 0.00100; 5267/14813 tok/s;   6450 sec
+[2018-12-10 10:26:28,405 INFO] Step 31750/500000; acc:  34.41; ppl: 26.12; xent: 3.26; lr: 0.00100; 6919/19230 tok/s;   6497 sec
+[2018-12-10 10:27:14,649 INFO] Step 31800/500000; acc:  34.59; ppl: 25.64; xent: 3.24; lr: 0.00100; 6801/18803 tok/s;   6543 sec
+[2018-12-10 10:28:02,553 INFO] Step 31850/500000; acc:  34.50; ppl: 25.86; xent: 3.25; lr: 0.00100; 6863/18932 tok/s;   6591 sec
+[2018-12-10 10:28:49,843 INFO] Step 31900/500000; acc:  34.53; ppl: 25.62; xent: 3.24; lr: 0.00100; 6842/19070 tok/s;   6638 sec
+[2018-12-10 10:29:37,157 INFO] Step 31950/500000; acc:  34.51; ppl: 25.57; xent: 3.24; lr: 0.00100; 7015/19243 tok/s;   6685 sec
+[2018-12-10 10:30:24,400 INFO] Step 32000/500000; acc:  34.59; ppl: 25.43; xent: 3.24; lr: 0.00100; 6707/19192 tok/s;   6733 sec
+[2018-12-10 10:31:10,407 INFO] Step 32050/500000; acc:  34.63; ppl: 25.43; xent: 3.24; lr: 0.00100; 6918/18895 tok/s;   6779 sec
+[2018-12-10 10:31:57,591 INFO] Step 32100/500000; acc:  34.84; ppl: 25.00; xent: 3.22; lr: 0.00100; 6840/18687 tok/s;   6826 sec
+[2018-12-10 10:32:44,387 INFO] Step 32150/500000; acc:  34.75; ppl: 25.10; xent: 3.22; lr: 0.00100; 7159/18563 tok/s;   6873 sec
+[2018-12-10 10:33:27,785 INFO] Loading train dataset from data/model.train.3.pt, number of examples: 154444
+[2018-12-10 10:33:40,719 INFO] Step 32200/500000; acc:  34.71; ppl: 25.29; xent: 3.23; lr: 0.00100; 5714/15820 tok/s;   6929 sec
+[2018-12-10 10:34:27,992 INFO] Step 32250/500000; acc:  34.30; ppl: 26.38; xent: 3.27; lr: 0.00100; 6850/18721 tok/s;   6976 sec
+[2018-12-10 10:35:15,366 INFO] Step 32300/500000; acc:  34.46; ppl: 25.84; xent: 3.25; lr: 0.00100; 6768/18187 tok/s;   7024 sec
+[2018-12-10 10:36:01,721 INFO] Step 32350/500000; acc:  34.35; ppl: 25.99; xent: 3.26; lr: 0.00100; 6739/19127 tok/s;   7070 sec
+[2018-12-10 10:36:48,837 INFO] Step 32400/500000; acc:  34.59; ppl: 25.42; xent: 3.24; lr: 0.00100; 6829/19333 tok/s;   7117 sec
+[2018-12-10 10:37:35,537 INFO] Step 32450/500000; acc:  34.68; ppl: 25.22; xent: 3.23; lr: 0.00100; 6845/19013 tok/s;   7164 sec
+[2018-12-10 10:38:18,541 INFO] Loading train dataset from data/model.train.0.pt, number of examples: 295366
+[2018-12-10 10:38:30,931 INFO] Step 32500/500000; acc:  34.63; ppl: 25.27; xent: 3.23; lr: 0.00100; 5720/15598 tok/s;   7219 sec
+[2018-12-10 10:39:17,975 INFO] Step 32550/500000; acc:  34.61; ppl: 25.50; xent: 3.24; lr: 0.00100; 6723/18682 tok/s;   7266 sec
+[2018-12-10 10:40:05,016 INFO] Step 32600/500000; acc:  34.80; ppl: 25.03; xent: 3.22; lr: 0.00100; 6954/19114 tok/s;   7313 sec
+[2018-12-10 10:40:50,707 INFO] Step 32650/500000; acc:  34.85; ppl: 24.95; xent: 3.22; lr: 0.00100; 7002/19030 tok/s;   7359 sec
+[2018-12-10 10:41:37,871 INFO] Step 32700/500000; acc:  34.84; ppl: 24.83; xent: 3.21; lr: 0.00100; 6825/19068 tok/s;   7406 sec
+[2018-12-10 10:42:24,789 INFO] Step 32750/500000; acc:  34.88; ppl: 24.88; xent: 3.21; lr: 0.00100; 7000/18545 tok/s;   7453 sec
+[2018-12-10 10:43:11,848 INFO] Step 32800/500000; acc:  34.79; ppl: 24.86; xent: 3.21; lr: 0.00100; 6907/18987 tok/s;   7500 sec
+[2018-12-10 10:43:57,950 INFO] Step 32850/500000; acc:  35.05; ppl: 24.48; xent: 3.20; lr: 0.00100; 6623/18835 tok/s;   7546 sec
+[2018-12-10 10:44:44,912 INFO] Step 32900/500000; acc:  34.96; ppl: 24.38; xent: 3.19; lr: 0.00100; 6429/18372 tok/s;   7593 sec
+[2018-12-10 10:45:31,304 INFO] Step 32950/500000; acc:  34.99; ppl: 24.47; xent: 3.20; lr: 0.00100; 6843/18911 tok/s;   7639 sec
+[2018-12-10 10:46:18,558 INFO] Step 33000/500000; acc:  35.02; ppl: 24.49; xent: 3.20; lr: 0.00100; 6948/18468 tok/s;   7687 sec
+[2018-12-10 10:47:05,426 INFO] Step 33050/500000; acc:  35.07; ppl: 24.17; xent: 3.19; lr: 0.00100; 6956/19423 tok/s;   7734 sec
+[2018-12-10 10:47:25,970 INFO] Loading train dataset from data/model.train.1.pt, number of examples: 257550
+[2018-12-10 10:47:59,935 INFO] Step 33100/500000; acc:  34.70; ppl: 25.15; xent: 3.22; lr: 0.00100; 6215/16083 tok/s;   7788 sec
+[2018-12-10 10:48:46,472 INFO] Step 33150/500000; acc:  34.75; ppl: 25.13; xent: 3.22; lr: 0.00100; 6941/19137 tok/s;   7835 sec
+[2018-12-10 10:49:33,511 INFO] Step 33200/500000; acc:  34.68; ppl: 25.17; xent: 3.23; lr: 0.00100; 6970/18618 tok/s;   7882 sec
+[2018-12-10 10:50:20,277 INFO] Step 33250/500000; acc:  34.89; ppl: 24.76; xent: 3.21; lr: 0.00100; 6983/19014 tok/s;   7928 sec
+[2018-12-10 10:51:07,069 INFO] Step 33300/500000; acc:  34.87; ppl: 24.66; xent: 3.21; lr: 0.00100; 6887/19379 tok/s;   7975 sec
+[2018-12-10 10:51:53,496 INFO] Step 33350/500000; acc:  34.88; ppl: 24.50; xent: 3.20; lr: 0.00100; 6867/19499 tok/s;   8022 sec
+[2018-12-10 10:52:39,977 INFO] Step 33400/500000; acc:  34.96; ppl: 24.45; xent: 3.20; lr: 0.00100; 6784/19059 tok/s;   8068 sec
+[2018-12-10 10:53:26,694 INFO] Step 33450/500000; acc:  34.93; ppl: 24.31; xent: 3.19; lr: 0.00100; 6928/19235 tok/s;   8115 sec
+[2018-12-10 10:54:13,594 INFO] Step 33500/500000; acc:  35.02; ppl: 24.23; xent: 3.19; lr: 0.00100; 6847/18971 tok/s;   8162 sec
+[2018-12-10 10:54:59,453 INFO] Step 33550/500000; acc:  35.17; ppl: 24.04; xent: 3.18; lr: 0.00100; 6952/19703 tok/s;   8208 sec
+THCudaCheck FAIL file=/pytorch/aten/src/THC/generic/THCStorage.cpp line=36 error=6 : the launch timed out and was terminated
+Traceback (most recent call last):
+  File "train.py", line 120, in <module>
+    main(opt)
+  File "train.py", line 48, in main
+    p.join()
+  File "/home/ndemir/anaconda3/lib/python3.7/multiprocessing/process.py", line 140, in join
+    res = self._popen.wait(timeout)
+  File "/home/ndemir/anaconda3/lib/python3.7/multiprocessing/popen_fork.py", line 48, in wait
+    return self.poll(os.WNOHANG if timeout == 0.0 else 0)
+  File "/home/ndemir/anaconda3/lib/python3.7/multiprocessing/popen_fork.py", line 28, in poll
+    pid, sts = os.waitpid(self.pid, flag)
+  File "train.py", line 105, in signal_handler
+    raise Exception(msg)
+Exception: 
+
+-- Tracebacks above this line can probably
+                 be ignored --
+
+Traceback (most recent call last):
+  File "/home/ndemir/Yelp-reviews/src/Generating-Reviews/OpenNMT-py/train.py", line 63, in run
+    single_main(opt, device_id)
+  File "/home/ndemir/Yelp-reviews/src/Generating-Reviews/OpenNMT-py/onmt/train_single.py", line 154, in main
+    opt.valid_steps)
+  File "/home/ndemir/Yelp-reviews/src/Generating-Reviews/OpenNMT-py/onmt/trainer.py", line 171, in train
+    (normalization))
+  File "/home/ndemir/Yelp-reviews/src/Generating-Reviews/OpenNMT-py/onmt/utils/distributed.py", line 117, in all_gather_list
+    size = (255 * out_buffer[0].item()) + out_buffer[1].item()
+RuntimeError: cuda runtime error (6) : the launch timed out and was terminated at /pytorch/aten/src/THC/generic/THCStorage.cpp:36
+
