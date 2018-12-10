@@ -147,6 +147,7 @@ def batch_precision_recall_f_score(preds, y):
     y_pred = torch.round(torch.sigmoid(preds))
     y_pred = y_pred.detach().cpu().numpy()
     y_true = y.detach().cpu().numpy()
+
     precisions, recalls, f1_scores, _ = precision_recall_fscore_support(y_true, y_pred)
     # In the case that y passed in is all one class, then we still want to return array with 2 elems
     if len(precisions) != 2:
@@ -159,11 +160,14 @@ def batch_precision_recall_f_score(preds, y):
             return np.concatenate([[0.], precisions]), np.concatenate([[0.], recalls]), np.concatenate([[0.], f1_scores])
     return precisions, recalls, f1_scores
 
-# def batch_roc_score(preds, y):
-#     y_pred = torch.round(torch.sigmoid(preds))
-#     y_pred = y_pred.detach().numpy()
-#     y_true = y.detach().numpy() 
-#     roc_score = roc_auc_score(y_true, y_pred)
+
+
+
+def batch_roc_score(preds, y):
+    y_pred = torch.round(torch.sigmoid(preds))
+    y_pred = y_pred.detach().numpy()
+    y_true = y.detach().numpy() 
+    roc_score = roc_auc_score(y_true, y_pred)
 
 def main():
     def generate_bigrams(x):

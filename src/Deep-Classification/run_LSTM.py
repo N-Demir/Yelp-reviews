@@ -83,6 +83,7 @@ def train(model, iterator, loss_function, optimizer):
 		epoch_real_f_score += f1_scores[0]
 		epoch_fake_f_score += f1_scores[1]
 
+
 	# This gives average loss maybe on the batch
 	avg_prec = [epoch_real_prec / len(iterator), epoch_fake_prec / len(iterator)]
 	avg_recall = [epoch_real_recall / len(iterator),  epoch_fake_recall / len(iterator)]
@@ -122,6 +123,7 @@ def evaluate_model(model, iterator, loss_function):
 			epoch_real_f_score += f1_scores[0]
 			epoch_fake_f_score += f1_scores[1]
 
+
 	# May want to do this differently - prob doesnt matter really
 	avg_prec = [epoch_real_prec / len(iterator), epoch_fake_prec / len(iterator)]
 	avg_recall = [epoch_real_recall / len(iterator),  epoch_fake_recall / len(iterator)]
@@ -149,6 +151,7 @@ def batch_precision_recall_f_score(preds, y):
         else:
             return np.concatenate([[0.], precisions]), np.concatenate([[0.], recalls]), np.concatenate([[0.], f1_scores])
     return precisions, recalls, f1_scores
+
 
 
 def main():
