@@ -1,3 +1,4 @@
+*.pt
 __MACOSX/
 models/
 .vector_cache/

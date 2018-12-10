@@ -5,6 +5,7 @@
 	Usage: python grapher.py <folder_path> <num_to_average_over>
 	
 	Txt file format: <epoch>,<value>
+	All other files and txt files with other format will be ignored
 '''
 
 import matplotlib.pyplot as plt
@@ -37,7 +38,16 @@ def makeGraph(root, file):
 		i = 0.
 		y_s = []
 		for line in f.readlines():
+			def checkFloat(string):
+				try:
+				    float(string)
+				    return True
+				except ValueError:
+				    return False
+
 			split_lines = line.split(",")
+			if len(split_lines) != 2 or not checkFloat(split_lines[0]) or not checkFloat(split_lines[1]):
+				return
 			y_s.append(float(split_lines[1]))
 			i += 1.
 			if i % avg_over == 0:
