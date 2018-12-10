@@ -4,6 +4,7 @@ import operator
 import sys
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold
+from behavioral_analysis import getReviewerStats
 
 import numpy as np
 
@@ -11,7 +12,7 @@ import util
 
 spacy_en = spacy.load('en')
 
-NUM_KFOLD_SPLITS = 20
+NUM_KFOLD_SPLITS = 5
 MAX_ITERATIONS = 1000
 LENGTH_OF_FEATURE_VECTOR = 1000
 
@@ -34,7 +35,7 @@ def create_dictionary(reviews):
     """Create a dictionary mapping words to integer indices.
 
     This function should create a dictionary of word to indices using the provided
-    training reviews. Use get_words to process each message. 
+    training reviews. Use get_words to process each message.
 
     Rare words are often not useful for modeling. Please only add words to the dictionary
     if they occur in at least five reviews.
@@ -56,7 +57,7 @@ def create_dictionary(reviews):
         for word in unique_words:
             message_counts[word] += 1
 
-            # We have seen it for the fifth time so let us add it to 
+            # We have seen it for the fifth time so let us add it to
             # the index_dict
             if (message_counts[word] == 5):
                 index_dict[word] = index
@@ -71,10 +72,10 @@ def transform_text(reviews, word_dictionary):
     """Transform a list of text reviews into a numpy array for further processing.
 
     This function should create a numpy array that contains the number of times each word
-    appears in each message. Each row in the resulting array should correspond to each 
+    appears in each message. Each row in the resulting array should correspond to each
     message and each column should correspond to a word.
 
-    Use the provided word dictionary to map words to column indices. Ignore words that 
+    Use the provided word dictionary to map words to column indices. Ignore words that
     are not present in the dictionary. Use get_words to get the words for a message.
 
     Args:
@@ -128,18 +129,25 @@ def get_features(reviews, top_words):
 
     return features
 
+def get_behavior_features(reviewerIDs, reviewerStats):
+    fullFeatures = []
+    for i, reviewerID in enumerate(reviewerIDs):
+        fullFeatures.append(reviewerStats[reviewerID])
+    return fullFeatures
+
 def main():
     if len(sys.argv) >= 2:
         dataset = sys.argv[1]
-    else: 
+    else:
         dataset = "data/YelpChi/"
 
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
     print('Loading in dataset from {}'.format(dataset))
 
-    reviews, labels = util.load_yelp_dataset_full("data/YelpChi/")
+    # reviews, labels = util.load_yelp_dataset_full("data/YelpChi/")
     # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
+    reviews, labels, reviewerIDs, dates, productIDs, ratings = util.load_behavioral_tsv_dataset('../data/large_behavior_balanced.tsv')
 
     print('Beginning Logistic Regression training')
 
@@ -149,14 +157,22 @@ def main():
     precisions = []
     recalls = []
     f_scores = []
+    reviewer_stats = getReviewerStats(reviews, labels, reviewerIDs, dates, productIDs, ratings)
     for train_index, test_index in kf.split(reviews):
         train_reviews, train_labels = reviews[train_index], labels[train_index]
         test_reviews, test_labels = reviews[test_index], labels[test_index]
+        # behavioral data
+        train_reviewerIDs, train_dates, train_productIDs, train_ratings = reviewerIDs[train_index], dates[train_index], productIDs[train_index], ratings[train_index]
+        test_reviewerIDs, test_dates, test_productIDs, test_ratings = reviewerIDs[test_index], dates[test_index], productIDs[test_index], ratings[test_index]
 
-        top_words = get_top_words(train_reviews, n=LENGTH_OF_FEATURE_VECTOR)
+        train_reviewerStats = getReviewerStats(train_reviews, train_labels, train_reviewerIDs, train_dates, train_productIDs, train_ratings)
 
-        training_features = get_features(train_reviews, top_words)
-        test_features = get_features(test_reviews, top_words)
+        #top_words = get_top_words(train_reviews, n=LENGTH_OF_FEATURE_VECTOR)
+
+        #training_word_features = get_features(train_reviews, top_words)
+        training_features = get_behavior_features(train_reviewerIDs, train_reviewerStats)
+        #test_word_features = get_features(test_reviews, top_words)
+        test_features = get_behavior_features(test_reviewerIDs, reviewer_stats)
 
         logreg = LogisticRegression(solver='lbfgs', max_iter=MAX_ITERATIONS)
         logreg.fit(training_features, train_labels)
@@ -176,7 +192,7 @@ def main():
         recalls.append(recall)
         f_scores.append(f_score)
         i += 1
-    
+
     print('Overall, Logistic Regression had an accuracy of {} and precision {} and recall {} and f_score {}'.format(np.mean(accuracies), np.mean(precisions), np.mean(recalls), np.mean(f_scores)))
 
 

@@ -44,6 +44,24 @@ def load_tsv_dataset(path):
 			labels.append(int(row[1]))
 	return np.array(reviews), np.array(labels)
 
+def load_behavioral_tsv_dataset(path):
+	reviews = []
+	labels = []
+	reviewerIDs = []
+	dates = []
+	productIDs = []
+	ratings = []
+	with open(path) as tsvfile:
+		reader = csv.reader(tsvfile, dialect='excel-tab')
+		for row in reader:
+			reviews.append(row[0])
+			labels.append(int(row[1]))
+			reviewerIDs.append(row[2])
+			dates.append(row[3])
+			productIDs.append(row[4])
+			ratings.append(row[5])
+	return np.array(reviews), np.array(labels), np.array(reviewerIDs), np.array(dates), np.array(productIDs), np.array(ratings)
+
 def load_review_dataset(folder, folds):
 	"""Load the review dataset from a given polarity folder
 
