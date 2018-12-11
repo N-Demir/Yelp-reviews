@@ -2,6 +2,12 @@ import numpy as np
 from collections import defaultdict, Counter
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from bisect import bisect_left
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
+
+import util
 import csv
 
 meta_path = '../data/YelpChi/output_meta_yelpResData_NRYRcleaned.txt'
@@ -39,7 +45,7 @@ def getReviewerStats(reviewsText, labels, reviewerIDs, dates, productIDs, rating
         # Calculate avg_deviation
         deviation = []
         for review_info in reviews:
-            deviation.append(np.abs(avg_product_scores[review_info[1]] - float(review_info[3])))
+            deviation.append(np.mean(np.abs(product_ratings[review_info[1]]-np.array([float(review_info[3])]))))# deviation.append(np.abs(avg_product_scores[review_info[1]] - float(review_info[3])))
         avg_deviation = np.mean(deviation)
 
         # Calculate maimum_content_similarity
@@ -138,5 +144,52 @@ def main():
     # print("fake: ", np.mean(fakeDeviation))
     # print("real: ", np.mean(realDeviation))
 
+def graph_cdfs():
+    reviews, labels, reviewerIDs, dates, productIDs, ratings = util.load_behavioral_tsv_dataset('../data/YelpChi/labeled_behavioral_reviews.tsv')
+
+    fakeSimil = []
+    realSimil = []
+    fakeLength = []
+    realLength = []
+    fakeMax = []
+    realMax = []
+    fakePositive = []
+    realPositive = []
+    fakeDeviation = []
+    realDeviation = []
+    reviewer_stats = getReviewerStats(reviews, labels, reviewerIDs, dates, productIDs, ratings)
+    for reviewerID, stats in reviewer_stats.items():
+        reviewer_idxs = np.where(reviewerIDs==reviewerID)
+        reviewer_labels = labels[reviewer_idxs]
+        if np.max(np.array(list(map(int, reviewer_labels)))) == 1:
+            fakeSimil.append(stats[4])
+            fakeLength.append(stats[2])
+            fakeMax.append(stats[0])
+            fakePositive.append(stats[1])
+            fakeDeviation.append(stats[3])
+        else:
+            realSimil.append(stats[4])
+            realLength.append(stats[2])
+            realMax.append(stats[0])
+            realPositive.append(stats[1])
+            realDeviation.append(stats[3])
+
+    data = [(fakeSimil, realSimil), (fakeLength, realLength), (fakeMax, realMax), (fakePositive, realPositive), (fakeDeviation, realDeviation)]
+    titles = ["Maximum content Similarity", "Average content length", "Maximum number of reviews / day", "Percent of positive reviews", "Average rating deviation"]
+
+    fig, axes = plt.subplots(1, 5)
+    for i, (fake, real) in enumerate(data):
+        sorted_real = np.sort(real)
+        sorted_fake = np.sort(fake)
+
+        real_yvals = np.arange(len(sorted_real))/float(len(sorted_real)-1)
+        fake_yvals = np.arange(len(sorted_fake))/float(len(sorted_fake)-1)
+        axes[i].plot(sorted_real, real_yvals)
+        axes[i].plot(sorted_fake, fake_yvals, 'r')
+        axes[i].set_title(titles[i])
+
+    plt.show()
+
 if __name__ == '__main__':
-    main()
+    #main()
+    graph_cdfs()
