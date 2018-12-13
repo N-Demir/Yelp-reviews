@@ -184,9 +184,10 @@ def graph_cdfs():
 
         real_yvals = np.arange(len(sorted_real))/float(len(sorted_real)-1)
         fake_yvals = np.arange(len(sorted_fake))/float(len(sorted_fake)-1)
-        axes[i].plot(sorted_real, real_yvals)
-        axes[i].plot(sorted_fake, fake_yvals, 'r')
+        axes[i].plot(sorted_real, real_yvals, label = "real")
+        axes[i].plot(sorted_fake, fake_yvals, 'r', label = "fake")
         axes[i].set_title(titles[i])
+    axes[4].legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
     plt.show()
 
