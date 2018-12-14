@@ -13,6 +13,7 @@ import sys
 import os
 
 avg_over = float(sys.argv[2])
+# x_tick_distance = int(sys.argv[3])
 
 def walkThroughFolder(folder_name):
 	for root, dirs, files in os.walk(folder_name):
@@ -51,7 +52,7 @@ def makeGraph(root, file):
 			y_s.append(float(split_lines[1]))
 			i += 1.
 			if i % avg_over == 0:
-				x.append(i)
+				x.append(split_lines[0])
 				y.append(sum(y_s) / avg_over)
 				y_s = []
 

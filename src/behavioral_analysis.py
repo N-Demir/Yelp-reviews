@@ -31,16 +31,16 @@ def getReviewerStats(reviewsText, labels, reviewerIDs, dates, productIDs, rating
 
         # Calculating maximum_number_of_reviews
         counter = Counter(reviews[:, 0])
-        maximum_number_of_reviews = counter.most_common(1)[0][1]
+        maximum_number_of_reviews = counter.most_common(1)[0][1]  # Tiny impact. Does this even mean anything?
 
-        # Calculating percentage_of_positive_reviews
+        # Calculating avg review value
         reviewer_ratings = reviews[:, 3]
         reviewer_ratings = np.array(list(map(float, reviewer_ratings)))
-        percentage_of_positive_reviews = len(reviewer_ratings[reviewer_ratings>=4])/len(reviewer_ratings)
+        avg_value_of_review = np.mean(reviewer_ratings) # No impact
 
         # Calculating avg_review_length
         reviews_text = reviews[:, 4]
-        avg_review_length = np.mean([len(sentence.split()) for sentence in reviews_text])
+        avg_review_length = np.mean([len(sentence.split()) for sentence in reviews_text]) #5 %
 
         # Calculate avg_deviation
         deviation = []
@@ -55,9 +55,9 @@ def getReviewerStats(reviewsText, labels, reviewerIDs, dates, productIDs, rating
             counts_matrix = vectorizer.fit_transform(reviews_text)
             cosine_similarities = cosine_similarity(counts_matrix)
             np.fill_diagonal(cosine_similarities, 0)
-            maximum_content_similarity = np.max(cosine_similarities)
+            maximum_content_similarity = np.max(cosine_similarities) # No impact either ??
 
-        reviewer_stats[reviewer] = [maximum_number_of_reviews, percentage_of_positive_reviews, avg_review_length, avg_deviation, maximum_content_similarity]
+        reviewer_stats[reviewer] = [avg_deviation, avg_review_length]
     return reviewer_stats
 
 def main():

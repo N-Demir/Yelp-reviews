@@ -30,7 +30,7 @@ def main():
                     fake_reviews.append([review, label, reviewerID, date, productID, rating])
                 else:
                     true_reviews.append([review, label, reviewerID, date, productID, rating])
-    elif len(sys.argv) == 1  or sys.argv[1] == "nyc" or sys.argv[1] == "both":
+    if len(sys.argv) == 1  or sys.argv[1] == "nyc" or sys.argv[1] == "both":
         print("Parsing through NYC file")
         if len(sys.argv) >1 and sys.argv[1] == "nyc":
             outpath = "../data/YelpNYC/labeled_behavioral_reviews.tsv"
