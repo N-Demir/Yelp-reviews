@@ -177,7 +177,14 @@ def graph_cdfs():
     data = [(fakeSimil, realSimil), (fakeLength, realLength), (fakeMax, realMax), (fakePositive, realPositive), (fakeDeviation, realDeviation)]
     titles = ["Maximum content Similarity", "Average content length", "Maximum number of reviews / day", "Percent of positive reviews", "Average rating deviation"]
 
-    fig, axes = plt.subplots(1, 5)
+    fig = plt.figure(constrained_layout=True)
+    spec = fig.add_gridspec(3,4)
+    ax_0 = fig.add_subplot(spec[0,:2])
+    ax_1 = fig.add_subplot(spec[0,2:])
+    ax_2 = fig.add_subplot(spec[1,:2])
+    ax_3 = fig.add_subplot(spec[1,2:])
+    ax_4 = fig.add_subplot(spec[2, 1:3])
+    axes = [ax_0, ax_1, ax_2, ax_3, ax_4]
     for i, (fake, real) in enumerate(data):
         sorted_real = np.sort(real)
         sorted_fake = np.sort(fake)
@@ -187,7 +194,7 @@ def graph_cdfs():
         axes[i].plot(sorted_real, real_yvals, label = "real")
         axes[i].plot(sorted_fake, fake_yvals, 'r', label = "fake")
         axes[i].set_title(titles[i])
-    axes[4].legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    axes[4].legend(loc='best')
 
     plt.show()
 
