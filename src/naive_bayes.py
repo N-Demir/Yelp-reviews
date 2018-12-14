@@ -8,6 +8,7 @@ from pathlib import Path
 from datetime import datetime
 from behavioral_analysis import getReviewerStats
 from sklearn.preprocessing import normalize
+from sklearn.metrics import confusion_matrix
 
 import sys
 import util
@@ -210,6 +211,7 @@ def main():
     real_f_scores = []
     fake_f_scores = []
     reviewer_stats = getReviewerStats(reviews, labels, reviewerIDs, dates, productIDs, ratings)
+    confusionMatrix = np.zeros((2, 2))
     for train_index, test_index in kf.split(reviews):
         train_reviews, train_labels = reviews[train_index], labels[train_index]
         test_reviews, test_labels = reviews[test_index], labels[test_index]
@@ -230,6 +232,7 @@ def main():
         clf.fit(train_reviews, train_labels)
 
         naive_bayes_predictions = clf.predict(test_reviews)
+        confusionMatrix += confusion_matrix(test_labels, naive_bayes_predictions)
 
         # analyze_results(test_reviews, test_labels, naive_bayes_predictions)
 
@@ -256,8 +259,8 @@ def main():
     print('Overall, Naive Bayes had an accuracy of {}.'.format(avg_accuracy))
     print('Real reviews with precision {} and recall {} and f_score {}'.format(np.mean(real_precisions), np.mean(real_recalls), np.mean(real_f_scores)))
     print('Fake reviews with precision {} and recall {} and f_score {}'.format(np.mean(fake_precisions), np.mean(fake_recalls), np.mean(fake_f_scores)))
-
-    saveMetrics('valid', avg_accuracy, [np.mean(real_precisions), np.mean(fake_precisions)], [np.mean(real_recalls), np.mean(fake_recalls)], [np.mean(real_f_scores), np.mean(fake_f_scores)], i)
+    print(confusionMatrix)
+    # saveMetrics('valid', avg_accuracy, [np.mean(real_precisions), np.mean(fake_precisions)], [np.mean(real_recalls), np.mean(fake_recalls)], [np.mean(real_f_scores), np.mean(fake_f_scores)], i)
 
 if __name__ == "__main__":
     main()
