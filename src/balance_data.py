@@ -1,10 +1,10 @@
 import numpy as np
 import csv
 
-path = '../data/YelpChi/labeled_reviews.tsv'
+path = '../data/YelpChi/labeled_reviews_hotel.tsv'
 pathMetaNYC = '../data/YelpNYC/metadata'
 pathReviewNYC = '../data/YelpNYC/reviewContent'
-outpath = '../data/large_balanced.tsv'
+outpath = '../data/large_balanced_hotel.tsv'
 
 def main():
     true_reviews = []
@@ -17,6 +17,7 @@ def main():
                 true_reviews.append(row)
             else:
                 fake_reviews.append(row)
+    '''
     print("Parsing through NYC file")
     with open(pathMetaNYC) as metaNYC, open(pathReviewNYC) as reviewNYC:
         meta_reader = csv.reader(metaNYC, dialect = 'excel-tab')
@@ -26,6 +27,7 @@ def main():
                 true_reviews.append([reviewrow[3], '0'])
             else:
                 fake_reviews.append([reviewrow[3], '1'])
+    '''
 
     print("Creating new true review list")
     num_fake = len(fake_reviews)
