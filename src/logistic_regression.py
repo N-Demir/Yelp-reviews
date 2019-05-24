@@ -6,6 +6,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import KFold
 from behavioral_analysis import getReviewerStats
 
+from sklearn.preprocessing import normalize
+from sklearn.feature_extraction.text import CountVectorizer
+
+
 import numpy as np
 
 import util
@@ -133,26 +137,30 @@ def get_behavior_features(reviewerIDs, reviewerStats):
     fullFeatures = []
     for i, reviewerID in enumerate(reviewerIDs):
         fullFeatures.append(reviewerStats[reviewerID])
-    return fullFeatures
+
+    return np.array(fullFeatures)
 
 def main():
-    if len(sys.argv) >= 2:
-        dataset = sys.argv[1]
-    else:
-        dataset = "data/YelpChi/"
+    # if len(sys.argv) >= 2:
+    #     dataset = sys.argv[1]
+    # else:
+    #     dataset = "data/YelpChi/"
+
 
     kf = KFold(n_splits=NUM_KFOLD_SPLITS, shuffle=True)
 
-    print('Loading in dataset from {}'.format(dataset))
+    # print('Loading in dataset from {}'.format(dataset))
 
     # reviews, labels = util.load_yelp_dataset_full("data/YelpChi/")
     # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
-    reviews, labels, reviewerIDs, dates, productIDs, ratings = util.load_behavioral_tsv_dataset('../data/large_behavior_balanced.tsv')
+
+    reviews, labels, reviewerIDs, dates, productIDs, ratings = util.load_behavioral_tsv_dataset('../data/YelpChi/labeled_behavioral_reviews.tsv')
+
 
     print('Beginning Logistic Regression training')
 
     i = 0
-    train_errors = []
+    train_accuracy = []
     accuracies = []
     precisions = []
     recalls = []
@@ -167,18 +175,27 @@ def main():
 
         train_reviewerStats = getReviewerStats(train_reviews, train_labels, train_reviewerIDs, train_dates, train_productIDs, train_ratings)
 
-        #top_words = get_top_words(train_reviews, n=LENGTH_OF_FEATURE_VECTOR)
 
-        #training_word_features = get_features(train_reviews, top_words)
-        training_features = get_behavior_features(train_reviewerIDs, train_reviewerStats)
-        #test_word_features = get_features(test_reviews, top_words)
-        test_features = get_behavior_features(test_reviewerIDs, reviewer_stats)
+        # top_words = get_top_words(train_reviews, n=LENGTH_OF_FEATURE_VECTOR)
 
-        logreg = LogisticRegression(solver='lbfgs', max_iter=MAX_ITERATIONS)
+        vectorizer = CountVectorizer()
+        vectorizer.fit(train_reviews)
+
+        training_word_features = vectorizer.transform(train_reviews).todense()#get_features(train_reviews, top_words)
+        training_behavior_features = get_behavior_features(train_reviewerIDs, train_reviewerStats)
+        test_word_features = vectorizer.transform(test_reviews).todense()#get_features(test_reviews, top_words)
+        test_behavior_features = get_behavior_features(test_reviewerIDs, reviewer_stats)
+        training_features = np.concatenate([training_behavior_features], axis = 1)
+        test_features = np.concatenate([test_behavior_features], axis = 1)
+        training_features = normalize(training_features)
+        test_features = normalize(test_features)
+
+
+        logreg = LogisticRegression(solver='lbfgs', max_iter=MAX_ITERATIONS, verbose = True)
         logreg.fit(training_features, train_labels)
         y_pred = logreg.predict(test_features)
 
-        # train_errors.append(logreg.score(training_features, train_labels))
+        train_accuracy.append(logreg.score(training_features, train_labels))
         # accuracies.append(logreg.score(test_features, test_labels))
 
         log_reg_accuracy = np.mean(y_pred == test_labels)
@@ -187,14 +204,17 @@ def main():
         print('Logistic Regression had an accuracy of {} on the testing set for kfold {}'.format(log_reg_accuracy, i))
         print("Precision {} Recall {} F_score {}".format(precision, recall, f_score))
 
+        print('Double checking {}'.format(logreg.score(test_features, test_labels)))
+
         accuracies.append(log_reg_accuracy)
         precisions.append(precision)
         recalls.append(recall)
         f_scores.append(f_score)
         i += 1
 
-    print('Overall, Logistic Regression had an accuracy of {} and precision {} and recall {} and f_score {}'.format(np.mean(accuracies), np.mean(precisions), np.mean(recalls), np.mean(f_scores)))
 
+    print('Overall, Logistic Regression had an accuracy of {} and precision {} and recall {} and f_score {}'.format(np.mean(accuracies), np.mean(precisions), np.mean(recalls), np.mean(f_scores)))
+    print('Train accuracy {}'.format(np.mean(train_accuracy)))
 
 if __name__ == "__main__":
     main()

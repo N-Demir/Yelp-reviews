@@ -6,12 +6,15 @@ from sklearn.model_selection import KFold
 from sklearn.naive_bayes import MultinomialNB
 from pathlib import Path
 from datetime import datetime
+from behavioral_analysis import getReviewerStats
+from sklearn.preprocessing import normalize
+from sklearn.metrics import confusion_matrix
 
 import sys
 import util
 import csv
 
-NUM_KFOLD_SPLITS = 20
+NUM_KFOLD_SPLITS = 5
 CURRENT_TIME = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 REPOSITORY_NAME = 'Yelp-reviews'
 
@@ -176,6 +179,12 @@ def saveMetrics(prefix, accuracy, precisions, recalls, f1_scores, epoch):
     writeMetric(real_f1_score_path, real_f1_score)
     writeMetric(fake_f1_score_path, fake_f1_score)
 
+def get_behavior_features(reviewerIDs, reviewerStats):
+    fullFeatures = []
+    for i, reviewerID in enumerate(reviewerIDs):
+        fullFeatures.append(reviewerStats[reviewerID])
+    return np.array(fullFeatures)
+
 def main():
     # if len(sys.argv) >= 2:
     #     dataset = sys.argv[1]
@@ -188,7 +197,8 @@ def main():
 
     # reviews, labels = util.load_yelp_dataset_full(dataset)
     # reviews, labels = util.load_review_dataset_full('data/op_spam_v1.4')
-    reviews, labels = util.load_tsv_dataset(path)
+    # reviews, labels = util.load_tsv_dataset(path)
+    reviews, labels, reviewerIDs, dates, productIDs, ratings = util.load_behavioral_tsv_dataset('../data/YelpChi/labeled_behavioral_reviews.tsv')
 
     print('Beginning Naive Bayes training')
 
@@ -200,18 +210,29 @@ def main():
     fake_recalls = []
     real_f_scores = []
     fake_f_scores = []
+    reviewer_stats = getReviewerStats(reviews, labels, reviewerIDs, dates, productIDs, ratings)
+    confusionMatrix = np.zeros((2, 2))
     for train_index, test_index in kf.split(reviews):
         train_reviews, train_labels = reviews[train_index], labels[train_index]
         test_reviews, test_labels = reviews[test_index], labels[test_index]
 
+        train_reviewerIDs, train_dates, train_productIDs, train_ratings = reviewerIDs[train_index], dates[train_index], productIDs[train_index], ratings[train_index]
+        test_reviewerIDs, test_dates, test_productIDs, test_ratings = reviewerIDs[test_index], dates[test_index], productIDs[test_index], ratings[test_index]
+
+        train_reviewerStats = getReviewerStats(train_reviews, train_labels, train_reviewerIDs, train_dates, train_productIDs, train_ratings)
+        training_behavior_features = get_behavior_features(train_reviewerIDs, train_reviewerStats)
+        test_behavior_features = get_behavior_features(test_reviewerIDs, reviewer_stats)
+
+
         dictionary = create_dictionary(train_reviews)
-        train_reviews = transform_text(train_reviews, dictionary)
-        test_reviews = transform_text(test_reviews, dictionary)
+        train_reviews = np.concatenate([transform_text(train_reviews, dictionary), training_behavior_features], axis = 1)
+        test_reviews = np.concatenate([transform_text(test_reviews, dictionary), test_behavior_features], axis = 1)
 
         clf = MultinomialNB()
         clf.fit(train_reviews, train_labels)
 
         naive_bayes_predictions = clf.predict(test_reviews)
+        confusionMatrix += confusion_matrix(test_labels, naive_bayes_predictions)
 
         # analyze_results(test_reviews, test_labels, naive_bayes_predictions)
 
@@ -238,8 +259,8 @@ def main():
     print('Overall, Naive Bayes had an accuracy of {}.'.format(avg_accuracy))
     print('Real reviews with precision {} and recall {} and f_score {}'.format(np.mean(real_precisions), np.mean(real_recalls), np.mean(real_f_scores)))
     print('Fake reviews with precision {} and recall {} and f_score {}'.format(np.mean(fake_precisions), np.mean(fake_recalls), np.mean(fake_f_scores)))
-
-    saveMetrics('valid', avg_accuracy, [np.mean(real_precisions), np.mean(fake_precisions)], [np.mean(real_recalls), np.mean(fake_recalls)], [np.mean(real_f_scores), np.mean(fake_f_scores)], i)
+    print(confusionMatrix)
+    # saveMetrics('valid', avg_accuracy, [np.mean(real_precisions), np.mean(fake_precisions)], [np.mean(real_recalls), np.mean(fake_recalls)], [np.mean(real_f_scores), np.mean(fake_f_scores)], i)
 
 if __name__ == "__main__":
     main()
